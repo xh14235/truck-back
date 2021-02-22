@@ -6,7 +6,9 @@
         <div class="reagon-popup-close" @click="hidePopup()">&times;</div>
       </div>
       <div class="reagon-popup-main">
-        <div class="reagon-popup-info">确定要删除该账号吗？</div>
+        <div class="reagon-popup-info">
+          <div class="reagon-popup-confirm">确定要删除该角色吗？</div>
+        </div>
       </div>
       <div class="reagon-popup-bottom">
         <div class="reagon-popup-btn" @click="confirm()">确定</div>

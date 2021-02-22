@@ -6,7 +6,9 @@
         <div class="reagon-popup-close" @click="hidePopup()">&times;</div>
       </div>
       <div class="reagon-popup-main">
-        <div class="reagon-popup-info">确定删除吗</div>
+        <div class="reagon-popup-info">
+          <div class="reagon-popup-confirm">确定要删除该资源吗？</div>
+        </div>
       </div>
       <div class="reagon-popup-bottom">
         <div class="reagon-popup-btn" @click="confirm()">确定</div>

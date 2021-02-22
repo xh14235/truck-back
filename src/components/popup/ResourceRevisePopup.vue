@@ -2,7 +2,7 @@
   <div class="reagon-popup-bg">
     <div class="reagon-popup-wrapper video-popup-wrapper">
       <div class="reagon-popup-top">
-        <div class="reagon-popup-title">提示</div>
+        <div class="reagon-popup-title">编辑</div>
         <div class="reagon-popup-close" @click="hidePopup()">&times;</div>
       </div>
       <div class="reagon-popup-main">
@@ -109,7 +109,7 @@ export default {
           }
         ];
       }
-      this.info.categoryId = this.options[0].sort;
+      this.info.categoryId = this.options[0].id;
     });
   }
 };

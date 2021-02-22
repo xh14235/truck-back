@@ -20,10 +20,10 @@
             <el-form-item label="上级菜单" prop="parentId">
               <el-select v-model="ruleForm.parentId" placeholder="请选择">
                 <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-for="item in list"
+                  :key="item.id"
+                  :label="item.title"
+                  :value="item.id"
                 >
                 </el-option>
               </el-select>
@@ -63,14 +63,11 @@ import { mapMutations } from "vuex";
 import { createMenu } from "@/http/api";
 export default {
   name: "MenuAddPopup",
+  props: {
+    list: Array
+  },
   data() {
     return {
-      options: [
-        {
-          label: "无上级菜单",
-          value: 0
-        }
-      ],
       ruleForm: {
         name: "",
         parentId: "",

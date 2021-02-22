@@ -2,7 +2,7 @@
   <div class="list-wrapper">
     <div class="add-button">
       <button class="search-btn search-query" @click="showMenuAddPopup">
-        <i class="el-icon-plus"></i> 添加账号
+        <i class="el-icon-plus"></i> 添加菜单
       </button>
     </div>
     <div class="reagon-table-wrapper">
@@ -28,7 +28,9 @@
           >
             <td class="reagon-table-item">{{ index + 1 }}</td>
             <td class="reagon-table-item">{{ item.title }}</td>
-            <td class="reagon-table-item">{{ item.level }}</td>
+            <td class="reagon-table-item">
+              {{ item.level === 0 ? "一级" : "二级" }}
+            </td>
             <td class="reagon-table-item">{{ item.name }}</td>
             <td class="reagon-table-item">{{ item.icon }}</td>
             <td class="reagon-table-item">
@@ -73,7 +75,7 @@
         </tbody>
       </table>
     </div>
-    <MenuAddPopup v-if="menu.menuAddPopup"></MenuAddPopup>
+    <MenuAddPopup :list="selectList" v-if="menu.menuAddPopup"></MenuAddPopup>
     <MenuStatePopup :info="rowItem" v-if="menu.menuStatePopup"></MenuStatePopup>
     <MenuRevisePopup
       :info="rowItem"
@@ -96,7 +98,9 @@ export default {
   data() {
     return {
       menuList: [],
-      rowItem: {}
+      selectList: [],
+      rowItem: {},
+      level: 0
     };
   },
   computed: {
@@ -107,7 +111,11 @@ export default {
   },
   watch: {
     menuChange() {
-      this.getMenuList(1);
+      if (!this.level) {
+        this.getMenuList(1);
+      } else {
+        this.getChildrenList(this.level, true);
+      }
     }
   },
   components: {
@@ -125,37 +133,49 @@ export default {
       "showMenuDeletePopup"
     ]),
     getMenuList(boo) {
-      // console.log(boo);
+      this.level = 0;
       if (boo) {
         getMenuList().then(res => {
           if (res.code === 200) {
             this.menuList = res.data;
-          } else {
-            this.menuList = [
-              {
-                children: [],
-                createTime: "2012-12-12",
-                hidden: 0,
-                icon: "00",
-                id: 0,
-                level: 0,
-                name: "菜单一",
-                parentId: 0,
-                sort: 0,
-                title: "菜单已"
-              }
-            ];
+            this.selectList = [];
+            this.selectList.push({
+              id: 0,
+              title: "无上级菜单"
+            });
+            res.data.forEach(item => {
+              this.selectList.push({
+                id: item.id,
+                title: item.title
+              });
+            });
           }
+          // else {
+          //   this.menuList = [
+          //     {
+          //       children: [],
+          //       createTime: "2012-12-12",
+          //       hidden: 0,
+          //       icon: "00",
+          //       id: 0,
+          //       level: 0,
+          //       name: "菜单一",
+          //       parentId: 0,
+          //       sort: 0,
+          //       title: "菜单已"
+          //     }
+          //   ];
+          // }
         });
       }
     },
     // 获取子类列表
     getChildrenList(parentId, boo) {
+      this.level = parentId;
       if (boo) {
         axios
           .get("http://116.236.30.222:9700/admin/menu/list/" + parentId)
           .then(res => {
-            console.log(res);
             this.menuList = res.data.data.list;
           });
       }
