@@ -1,0 +1,232 @@
+<template>
+  <div class="login-wrapper">
+    <img
+      src="../../assets/img/logo-white.png"
+      alt=""
+      class="reagon-logo-white"
+    />
+    <div class="login-box">
+      <div class="login-box-left">
+        <img src="../../assets/img/login-left.png" alt="" />
+      </div>
+      <div class="login-box-right">
+        <div class="login-title">后台管理系统</div>
+        <el-form class="login-form" :model="loginForm" :rules="loginRules">
+          <el-form-item prop="username">
+            <el-input
+              v-model="loginForm.username"
+              placeholder="请输入账号"
+            ></el-input>
+          </el-form-item>
+          <el-form-item class="psw-visible-box" prop="password">
+            <img
+              :src="require('../../assets/img/' + pswImg + '.png')"
+              @click="changePswVisible"
+              alt=""
+              class="psw-visible"
+            />
+            <el-input
+              v-model="loginForm.password"
+              :type="pswType"
+              placeholder="请输入密码"
+            ></el-input>
+          </el-form-item>
+        </el-form>
+        <div class="login-checkbox">
+          <input type="checkbox" v-model="rememberPwd" id="checkbox" />
+          <img
+            :src="
+              rememberPwd
+                ? require('@/assets/img/login-check2.png')
+                : require('@/assets/img/login-check1.png')
+            "
+            alt=""
+            class="icon"
+          />
+          <label for="checkbox">记住密码</label>
+        </div>
+        <button class="login-button" @click="handleLogin">登 录</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { login } from "@/http/api";
+import { mapMutations } from "vuex";
+export default {
+  name: "Login",
+  data() {
+    let validateUsername = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("用户名不能为空！"));
+      } else {
+        callback();
+      }
+    };
+    let validatePassword = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("密码不能为空！"));
+      } else {
+        callback();
+      }
+    };
+    return {
+      pswImg: "login-psw-hide",
+      pswType: "password",
+      loginForm: {
+        username: localStorage.username || "",
+        password: localStorage.password || ""
+      },
+      loginRules: {
+        username: [{ validator: validateUsername, trigger: "blur" }],
+        password: [{ validator: validatePassword, trigger: "blur" }]
+      },
+      rememberPwd: false
+    };
+  },
+  methods: {
+    ...mapMutations(["mutLogin"]),
+    changePswVisible() {
+      if (this.pswType === "password") {
+        this.pswType = "text";
+        this.pswImg = "login-psw-show";
+      } else {
+        this.pswType = "password";
+        this.pswImg = "login-psw-hide";
+      }
+    },
+    handleLogin() {
+      login({
+        username: this.loginForm.username,
+        password: this.$getRsaCode(this.loginForm.password)
+      }).then(res => {
+        if (res.code === 200) {
+          let token = res.data.tokenHead + res.data.token;
+          sessionStorage.setItem("token", token);
+          this.mutLogin(token);
+          localStorage.username = this.loginForm.username;
+          if (this.rememberPwd) {
+            localStorage.password = this.loginForm.password;
+          } else {
+            localStorage.password = "";
+          }
+          this.$router.push("/");
+        } else {
+          console.log(res.errorMsg);
+        }
+      });
+    }
+  }
+};
+</script>
+
+<style lang="stylus" scoped>
+@import '~@/assets/css/common.styl'
+$dd = #939DA8
+.el-form-item >>> .el-input__inner
+  border: 1px solid $dd
+  border-left: 5px solid $blue
+  border-radius: 0
+  background: $mainLight
+  font-size: $font20
+  font-weight: 600
+.is-error >>> .el-input__inner
+  border-color: $dd
+  border-left: 5px solid $blue
+  &:focus
+    border-color: $dd
+    border-left: 5px solid $blue
+.login-wrapper
+  position: absolute
+  top: 0
+  left: 0
+  width: 100vw
+  height: 100vh
+  background-image: url('../../assets/img/bg-main.png')
+  background-size: 100% auto
+  display: flex
+  justify-content: center
+  align-items: center
+  .login-box
+    width: 60%
+    height: 0
+    padding-bottom: 37%
+    box-shadow: 0px 0px 49px 0px rgba(169, 169, 169, 0.75)
+    background: $white
+    display: flex
+    .login-box-left
+      flex: 0 0 50%
+      width: 50%
+      display: flex
+      justify-content: center
+      align-items: flex-start
+      img
+        flex: 0 0 100%
+        width: 100%
+    .login-box-right
+      flex: 0 0 50%
+      width: 50%
+      height: 100%
+      display: flex
+      flex-direction: column
+      align-items: center
+      .login-title
+        font-size: $font36
+        margin: 7vw 0 5.21vw 0
+        color: #757575
+      .login-form
+        width: 20vw
+        .el-form-item
+          margin-bottom: 1.51vw
+        .psw-visible-box
+          position: relative
+          .psw-visible
+            width: 1.458vw
+            height: 1.458vw
+            position: absolute
+            top: 0.45vw
+            right: 0.5vw
+            z-index: 1
+            cursor: pointer
+      .login-checkbox
+        flex: 0 0 1.25vw
+        width: 20vw
+        height: 1.25vw
+        position: relative
+        overflow: hidden
+        input
+          width: 1.25vw
+          height: 1.25vw
+          position: absolute
+          left: 0
+          top: 0
+          opacity: 0
+          z-index: 1
+          cursor: pointer
+        label
+          color: #BBBBBB
+          line-height: 1.25vw
+          font-size: $font18
+          font-weight: 600
+          margin-left: 5px
+          cursor: pointer
+        .icon
+          width: 1.25vw
+          height: 1.25vw
+          vertical-align: top
+          cursor: pointer
+      .login-button
+        width: 20vw
+        height: 2.95vw
+        line-height: 2.95vw
+        margin-top: 1.771vw
+        border: none
+        outline: none
+        border-radius: 1.475vw
+        background: $blue
+        cursor: pointer
+        color: $white
+        font-weight: 600
+        font-size: $font24
+</style>
