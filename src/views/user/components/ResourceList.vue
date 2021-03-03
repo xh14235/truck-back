@@ -175,19 +175,19 @@ export default {
           this.options = [
             {
               createTime: "",
-              id: "",
+              id: "111",
               name: "全部",
               sort: "全部"
             },
             {
               createTime: "",
-              id: "",
+              id: "22",
               name: "用户管理",
               sort: "用户管理"
             },
             {
               createTime: "",
-              id: "",
+              id: "33",
               name: "台账管理",
               sort: "台账管理"
             }

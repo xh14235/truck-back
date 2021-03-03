@@ -1,55 +1,19 @@
 let defaultToken = sessionStorage.getItem("token") || "";
-let defaultUserName = localStorage.username || "";
+let defaultMenu2Active = sessionStorage.getItem("menu2Active") || 0;
+let defaultRealName = sessionStorage.getItem("realName") || "游客";
+let defaultMenu = JSON.parse(sessionStorage.getItem("menu")) || [];
 
 const common = {
   state: {
     token: defaultToken,
-    username: defaultUserName,
     baseUrl: "http://116.236.30.222:9700",
     roleChange: 0,
     userChange: 0,
     menuChange: 0,
     resourceChange: 0,
-    menu: [
-      {
-        title: "用户管理",
-        url: "/user",
-        icon: "menu-user",
-        children: [
-          {
-            title: "用户列表",
-            url: "/user/userlist"
-          },
-          {
-            title: "角色列表",
-            url: "/user/rolelist"
-          },
-          {
-            title: "菜单列表",
-            url: "/user/menulist"
-          },
-          {
-            title: "资源列表",
-            url: "/user/resourcelist"
-          }
-        ]
-      },
-      {
-        title: "台账管理",
-        url: "/account",
-        icon: "menu-account",
-        children: [
-          {
-            title: "动力设备管理",
-            url: "/account/equipment"
-          },
-          {
-            title: "仪表管理",
-            url: "/account/meter"
-          }
-        ]
-      }
-    ]
+    menu: defaultMenu,
+    realName: defaultRealName,
+    menu2Active: defaultMenu2Active
   },
   mutations: {
     mutLogin(state, token) {
@@ -66,6 +30,18 @@ const common = {
     },
     mutResourceChange(state) {
       state.resourceChange++;
+    },
+    mutMenu2Active(state, num) {
+      state.menu2Active = num;
+      sessionStorage.setItem("menu2Active", num);
+    },
+    mutRealName(state, realName) {
+      state.realName = realName;
+      sessionStorage.setItem("realName", realName);
+    },
+    mutMenu(state, menu) {
+      state.menu = menu;
+      sessionStorage.setItem("menu", JSON.stringify(menu));
     }
   }
 };

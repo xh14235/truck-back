@@ -43,8 +43,8 @@
             </el-form-item>
             <el-form-item label="是否启用" prop="hidden">
               <el-radio-group v-model="info.hidden">
-                <el-radio :label="1">是</el-radio>
-                <el-radio :label="0">否</el-radio>
+                <el-radio :label="0">是</el-radio>
+                <el-radio :label="1">否</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-form>
@@ -61,7 +61,6 @@
 <script>
 import { mapMutations } from "vuex";
 import axios from "axios";
-import qs from "qs";
 export default {
   name: "MenuRevisePopup",
   props: {
@@ -85,10 +84,17 @@ export default {
     ...mapMutations(["hidePopup", "mutMenuChange"]),
     confirm() {
       axios
-        .post(
-          "http://116.236.30.222:9700/admin/menu/update/" + this.info.id,
-          qs.stringify(this.info)
-        )
+        .post("http://116.236.30.222:9700/admin/menu/update/" + this.info.id, {
+          createTime: this.info.createTime,
+          hidden: this.info.hidden,
+          icon: this.info.icon,
+          id: this.info.id,
+          level: this.info.level,
+          name: this.info.name,
+          parentId: this.info.parentId,
+          sort: this.info.sort,
+          title: this.info.title
+        })
         .then(res => {
           if (res.data.code === 200) {
             this.mutMenuChange();
@@ -96,6 +102,9 @@ export default {
         });
       this.hidePopup();
     }
+  },
+  mounted() {
+    console.log(this.info);
   }
 };
 </script>

@@ -3,7 +3,7 @@ const popup = {
     user: {
       userStatePopup: false,
       userAddPopup: false,
-      userRolePopup: false,
+      userPswPopup: false,
       userRevisePopup: false,
       userDeletePopup: false
     },
@@ -36,8 +36,8 @@ const popup = {
     showUserAddPopup(state) {
       state.user.userAddPopup = true;
     },
-    showUserRolePopup(state) {
-      state.user.userRolePopup = true;
+    showUserPswPopup(state) {
+      state.user.userPswPopup = true;
     },
     showUserRevisePopup(state) {
       state.user.userRevisePopup = true;
@@ -94,7 +94,7 @@ const popup = {
       // 用户
       state.user.userStatePopup = false;
       state.user.userAddPopup = false;
-      state.user.userRolePopup = false;
+      state.user.userPswPopup = false;
       state.user.userRevisePopup = false;
       state.user.userDeletePopup = false;
       // 角色

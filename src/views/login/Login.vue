@@ -31,6 +31,7 @@
               placeholder="请输入密码"
             ></el-input>
           </el-form-item>
+          <div class="err-msg">{{ errMsg }}</div>
         </el-form>
         <div class="login-checkbox">
           <input type="checkbox" v-model="rememberPwd" id="checkbox" />
@@ -52,7 +53,7 @@
 </template>
 
 <script>
-import { login } from "@/http/api";
+import { login, getInfo } from "@/http/api";
 import { mapMutations } from "vuex";
 export default {
   name: "Login",
@@ -72,6 +73,7 @@ export default {
       }
     };
     return {
+      errMsg: "",
       pswImg: "login-psw-hide",
       pswType: "password",
       loginForm: {
@@ -86,7 +88,7 @@ export default {
     };
   },
   methods: {
-    ...mapMutations(["mutLogin"]),
+    ...mapMutations(["mutLogin", "mutRealName", "mutMenu", "mutMenu2Active"]),
     changePswVisible() {
       if (this.pswType === "password") {
         this.pswType = "text";
@@ -102,19 +104,63 @@ export default {
         password: this.$getRsaCode(this.loginForm.password)
       }).then(res => {
         if (res.code === 200) {
+          // 次级菜单
+          this.mutMenu2Active(0);
+          // 登录错误信息提示
+          this.errorMsg = "";
+          // 记住用户名
+          localStorage.username = this.loginForm.username;
+          // 储存token
           let token = res.data.tokenHead + res.data.token;
           sessionStorage.setItem("token", token);
           this.mutLogin(token);
-          localStorage.username = this.loginForm.username;
+          // 记住密码
           if (this.rememberPwd) {
             localStorage.password = this.loginForm.password;
           } else {
             localStorage.password = "";
           }
-          this.$router.push("/");
+          // 储存用户信息及左侧菜单
+          this.getInfo();
+          // 页面跳转
+          setTimeout(() => {
+            this.$router.push("/");
+          }, 100);
         } else {
-          console.log(res.errorMsg);
+          // 登录错误提示
+          this.errMsg = res.message;
         }
+      });
+    },
+    getInfo() {
+      getInfo().then(res => {
+        // 用户名
+        this.mutRealName(res.data.realName);
+        // 左侧菜单
+        let menu = [];
+        let menus = res.data.menus;
+        for (let i = 0; i < menus.length; i++) {
+          if (!menus[i].parentId) {
+            menu.push({
+              id: menus[i].id,
+              title: menus[i].title,
+              icon: menus[i].icon,
+              url: "/" + menus[i].name,
+              active: true,
+              children: []
+            });
+          } else {
+            for (let j = 0; j < menu.length; j++) {
+              if (menus[i].parentId === menu[j].id) {
+                menu[j].children.push({
+                  title: menus[i].title,
+                  url: menu[j].url + "/" + menus[i].name
+                });
+              }
+            }
+          }
+        }
+        this.mutMenu(menu);
       });
     }
   }
@@ -177,6 +223,7 @@ $dd = #939DA8
         color: #757575
       .login-form
         width: 20vw
+        position: relative
         .el-form-item
           margin-bottom: 1.51vw
         .psw-visible-box
@@ -189,6 +236,10 @@ $dd = #939DA8
             right: 0.5vw
             z-index: 1
             cursor: pointer
+        .err-msg
+          position: absolute
+          bottom: 5px
+          color: $red
       .login-checkbox
         flex: 0 0 1.25vw
         width: 20vw

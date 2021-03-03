@@ -4,6 +4,10 @@ import qs from "qs";
 // 登录 获取token
 export const login = params => post("admin/admin/login", params);
 
+// 获取登录信息
+
+export const getInfo = params => get("admin/admin/info", params);
+
 // 获取用户列表
 export const getUserList = params => get("admin/admin/list", params);
 
@@ -40,7 +44,8 @@ export const createMenu = params => post("admin/menu/create", params);
 export const menuToRole = params => post("admin/role/allocMenu", params);
 
 // 给角色分配资源
-export const ResourceToRole = params => post("admin/role/allocResource", params)
+export const ResourceToRole = params =>
+  post("admin/role/allocResource", params);
 
 // 获取资源分类
 export const getResourceType = params =>

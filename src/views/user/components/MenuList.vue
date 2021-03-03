@@ -35,8 +35,8 @@
             <td class="reagon-table-item">{{ item.icon }}</td>
             <td class="reagon-table-item">
               <el-switch
-                :active-value="1"
-                :inactive-value="0"
+                :active-value="0"
+                :inactive-value="1"
                 v-model="item.hidden"
                 active-color="#3B84C9"
                 inactive-color="#D2D9E1"
@@ -75,6 +75,17 @@
         </tbody>
       </table>
     </div>
+    <div class="pagination-wrapper">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :page-sizes="[5, 10]"
+        :page-size="pageSize"
+        layout="total, prev, pager, next, sizes, jumper"
+        :total="total"
+      >
+      </el-pagination>
+    </div>
     <MenuAddPopup :list="selectList" v-if="menu.menuAddPopup"></MenuAddPopup>
     <MenuStatePopup :info="rowItem" v-if="menu.menuStatePopup"></MenuStatePopup>
     <MenuRevisePopup
@@ -100,7 +111,10 @@ export default {
       menuList: [],
       selectList: [],
       rowItem: {},
-      level: 0
+      level: 0,
+      total: 0,
+      pageNum: 1,
+      pageSize: 10
     };
   },
   computed: {
@@ -132,6 +146,22 @@ export default {
       "showMenuRevisePopup",
       "showMenuDeletePopup"
     ]),
+    handleSizeChange(e) {
+      this.pageSize = e;
+      if (!this.level) {
+        this.getMenuList(1);
+      } else {
+        this.getChildrenList(this.level, true);
+      }
+    },
+    handleCurrentChange(e) {
+      this.pageNum = e;
+      if (!this.level) {
+        this.getMenuList(1);
+      } else {
+        this.getChildrenList(this.level, true);
+      }
+    },
     getMenuList(boo) {
       this.level = 0;
       if (boo) {
@@ -150,22 +180,6 @@ export default {
               });
             });
           }
-          // else {
-          //   this.menuList = [
-          //     {
-          //       children: [],
-          //       createTime: "2012-12-12",
-          //       hidden: 0,
-          //       icon: "00",
-          //       id: 0,
-          //       level: 0,
-          //       name: "菜单一",
-          //       parentId: 0,
-          //       sort: 0,
-          //       title: "菜单已"
-          //     }
-          //   ];
-          // }
         });
       }
     },
@@ -174,9 +188,19 @@ export default {
       this.level = parentId;
       if (boo) {
         axios
-          .get("http://116.236.30.222:9700/admin/menu/list/" + parentId)
+          .get("http://116.236.30.222:9700/admin/menu/list/" + parentId, {
+            params: {
+              parentId: parentId,
+              pageNum: this.pageNum,
+              pageSize: this.pageSize
+            }
+          })
           .then(res => {
             this.menuList = res.data.data.list;
+            this.total = res.data.data.total;
+            if (!this.menuList.length) {
+              this.getMenuList(1);
+            }
           });
       }
     },
@@ -195,7 +219,6 @@ export default {
   },
   mounted() {
     this.getMenuList(1);
-    // this.getChildrenList(0);
   }
 };
 </script>

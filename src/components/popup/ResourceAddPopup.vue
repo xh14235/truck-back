@@ -89,7 +89,6 @@ export default {
   },
   created() {
     getResourceType().then(res => {
-      console.log(res);
       if (res.code === 200) {
         this.options = res.data;
       } else {

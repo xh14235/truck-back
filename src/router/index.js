@@ -11,6 +11,11 @@ const routes = [
     meta: {
       auth: true
     },
+    beforeEnter(to, from, next) {
+      sessionStorage.setItem("activeMenu", 0);
+      sessionStorage.setItem("littleMenu", 0);
+      next();
+    },
     component: () =>
       import(/* webpackChunkName: "home" */ "../views/home/Home.vue")
   },
@@ -137,6 +142,10 @@ router.beforeEach((to, from, next) => {
       next("/login");
     }
   } else {
+    next();
+  }
+  if (to.path === "/" || to.path === "/login") {
+    sessionStorage.setItem("menu2Active", 0);
     next();
   }
 });

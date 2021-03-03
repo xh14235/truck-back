@@ -22,6 +22,7 @@
           <tr class="reagon-table-row">
             <th class="reagon-table-item">编号</th>
             <th class="reagon-table-item">账号</th>
+            <th class="reagon-table-item">角色</th>
             <th class="reagon-table-item">姓名</th>
             <th class="reagon-table-item">电话号码</th>
             <th class="reagon-table-item">邮箱地址</th>
@@ -38,6 +39,7 @@
           >
             <td class="reagon-table-item">{{ index + 1 }}</td>
             <td class="reagon-table-item">{{ item.username }}</td>
+            <td class="reagon-table-item">{{ item.roleName }}</td>
             <td class="reagon-table-item">{{ item.realName }}</td>
             <td class="reagon-table-item">{{ item.phone }}</td>
             <td class="reagon-table-item">{{ item.email }}</td>
@@ -54,11 +56,11 @@
               </el-switch>
             </td>
             <td class="reagon-table-item operation-cell">
-              <span class="reagon-table-btn" @click="roleItem(item)"
-                >分配角色</span
-              >
               <span class="reagon-table-btn" @click="reviseItem(item)"
                 >编辑</span
+              >
+              <span class="reagon-table-btn" @click="pswItem(item)"
+                >修改密码</span
               >
               <span class="reagon-table-btn" @click="deleteItem(item)"
                 >删除</span
@@ -68,8 +70,19 @@
         </tbody>
       </table>
     </div>
+    <div class="pagination-wrapper">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :page-sizes="[5, 10]"
+        :page-size="pageSize"
+        layout="total, prev, pager, next, sizes, jumper"
+        :total="total"
+      >
+      </el-pagination>
+    </div>
     <UserStatePopup :info="rowInfo" v-if="user.userStatePopup"></UserStatePopup>
-    <UserRolePopup :info="rowInfo" v-if="user.userRolePopup"></UserRolePopup>
+    <UserPswPopup :info="rowInfo" v-if="user.userPswPopup"></UserPswPopup>
     <UserAddPopup v-if="user.userAddPopup"></UserAddPopup>
     <UserRevisePopup
       v-if="user.userRevisePopup"
@@ -89,7 +102,7 @@ export default {
   name: "UserList",
   components: {
     UserStatePopup: () => import("@/components/popup/UserStatePopup"),
-    UserRolePopup: () => import("@/components/popup/UserRolePopup"),
+    UserPswPopup: () => import("@/components/popup/UserPswPopup"),
     UserAddPopup: () => import("@/components/popup/UserAddPopup"),
     UserRevisePopup: () => import("@/components/popup/UserRevisePopup"),
     UserDeletePopup: () => import("@/components/popup/UserDeletePopup")
@@ -99,7 +112,10 @@ export default {
       searchInfo: "",
       userList: [],
       rowInfo: {},
-      updateNum: 0
+      updateNum: 0,
+      total: 0,
+      pageNum: 1,
+      pageSize: 10
     };
   },
   computed: {
@@ -116,7 +132,7 @@ export default {
   methods: {
     ...mapMutations([
       "showUserStatePopup",
-      "showUserRolePopup",
+      "showUserPswPopup",
       "showUserAddPopup",
       "showUserRevisePopup",
       "showUserDeletePopup"
@@ -124,17 +140,26 @@ export default {
     search() {
       this.getUserList();
     },
+    handleSizeChange(e) {
+      this.pageSize = e;
+      this.search();
+    },
+    handleCurrentChange(e) {
+      this.pageNum = e;
+      this.search();
+    },
     reset() {
       this.searchInfo = "";
     },
     getUserList() {
       getUserList({
         keyword: this.searchInfo,
-        pageNum: 1,
-        pageSize: 10
+        pageNum: this.pageNum,
+        pageSize: this.pageSize
       }).then(res => {
         if (res.code === 200) {
           this.userList = res.data.list;
+          this.total = res.data.total;
         } else {
           this.userList = [
             {
@@ -174,9 +199,9 @@ export default {
       this.rowInfo = item;
       this.showUserDeletePopup();
     },
-    roleItem(item) {
+    pswItem(item) {
       this.rowInfo = item;
-      this.showUserRolePopup();
+      this.showUserPswPopup();
     }
   },
   mounted() {

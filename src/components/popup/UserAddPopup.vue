@@ -10,14 +10,24 @@
           :model="ruleForm"
           :rules="rules"
           ref="ruleForm"
-          label-width="100px"
-          class="demo-ruleForm"
+          label-width="25%"
         >
           <el-form-item label="账号" prop="account">
             <el-input v-model="ruleForm.account"></el-input>
           </el-form-item>
           <el-form-item label="姓名" prop="name">
             <el-input v-model="ruleForm.name"></el-input>
+          </el-form-item>
+          <el-form-item label="角色" prop="roleId">
+            <el-select v-model="ruleForm.roleId" placeholder="请选择">
+              <el-option
+                v-for="item in options"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              >
+              </el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="手机号码" prop="phone">
             <el-input v-model="ruleForm.phone"></el-input>
@@ -31,12 +41,6 @@
           <el-form-item label="重复密码" prop="psw2">
             <el-input type="password" v-model="ruleForm.psw2"></el-input>
           </el-form-item>
-          <!-- <el-form-item label="是否启用" prop="using">
-            <el-radio-group v-model="ruleForm.using">
-              <el-radio label="是"></el-radio>
-              <el-radio label="否"></el-radio>
-            </el-radio-group>
-          </el-form-item> -->
         </el-form>
       </div>
       <div class="reagon-popup-bottom">
@@ -49,53 +53,72 @@
 
 <script>
 import { mapMutations } from "vuex";
-import { addUser } from "@/http/api";
+import { addUser, getRoleList } from "@/http/api";
 export default {
   name: "UserAddPopup",
   data() {
+    let psw2 = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("请重复输入密码"));
+      } else if (value !== this.ruleForm.psw) {
+        callback(new Error("两次输入密码不一致!"));
+      } else {
+        callback();
+      }
+    };
     return {
       ruleForm: {
         account: "",
         name: "",
         phone: "",
+        roleId: "",
         email: "",
         psw: "",
         psw2: ""
-        // using: 1
       },
+      options: [],
       rules: {
         account: [{ required: true, message: "请输入账号", trigger: "blur" }],
-        name: [{ required: true, message: "请输入密码", trigger: "blur" }],
-        phone: [{ required: true, message: "请输入手机号码", trigger: "blur" }],
-        email: [{ required: true, message: "请输入邮箱地址", trigger: "blur" }],
+        name: [{ required: true, message: "请输入真实姓名", trigger: "blur" }],
         psw: [{ required: true, message: "请输入密码", trigger: "blur" }],
-        psw2: [{ required: true, message: "请再次输入密码", trigger: "blur" }],
-        using: [{ required: true, message: "", trigger: "blur" }]
+        psw2: [{ required: true, validator: psw2, trigger: "blur" }]
       }
     };
   },
   methods: {
     ...mapMutations(["hidePopup", "mutUserChange"]),
     confirm() {
-      addUser({
-        city: "",
-        icon: "",
-        nickName: "",
-        note: "",
-        organizationId: 0,
-        province: "",
-        username: this.ruleForm.account,
-        realName: this.ruleForm.name,
-        password: this.$getRsaCode(this.ruleForm.psw),
-        phone: this.ruleForm.phone,
-        email: this.ruleForm.email
-      }).then(res => {
-        if (res.code === 200) {
-          this.mutUserChange();
-        }
-      });
-      this.hidePopup();
+      if (this.ruleForm.psw === this.ruleForm.psw2) {
+        addUser({
+          city: "",
+          icon: "",
+          nickName: "",
+          note: "",
+          organizationId: 0,
+          province: "",
+          username: this.ruleForm.account,
+          realName: this.ruleForm.name,
+          roleId: this.ruleForm.roleId,
+          password: this.$getRsaCode(this.ruleForm.psw),
+          phone: this.ruleForm.phone,
+          email: this.ruleForm.email
+        }).then(res => {
+          if (res.code === 200) {
+            this.mutUserChange();
+          }
+        });
+        this.hidePopup();
+      }
     }
+  },
+  created() {
+    getRoleList({
+      keyword: "",
+      pageNum: 1,
+      pageSize: 10
+    }).then(res => {
+      this.options = res.data.list;
+    });
   }
 };
 </script>

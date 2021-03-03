@@ -43,8 +43,8 @@
             </el-form-item>
             <el-form-item label="是否启用" prop="hidden">
               <el-radio-group v-model="ruleForm.hidden">
-                <el-radio :label="1">是</el-radio>
-                <el-radio :label="0">否</el-radio>
+                <el-radio :label="0">是</el-radio>
+                <el-radio :label="1">否</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-form>
@@ -70,11 +70,11 @@ export default {
     return {
       ruleForm: {
         name: "",
-        parentId: "",
+        parentId: 0,
         title: "",
         icon: "",
         sort: 0,
-        hidden: 1
+        hidden: 0
       },
       rules: {
         name: [{ required: true, message: "请输入彩打 名称", trigger: "blur" }],

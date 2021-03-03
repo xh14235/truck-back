@@ -106,6 +106,9 @@
   border-radius: 10px;
   background: #ffffff;
 }
+.reagon-table{
+  width: 100%;
+}
 /* .reagon-table, .reagon-table-head, .reagon-table-body{
   width: 100%;
 } */
@@ -113,7 +116,7 @@
   height: 2.6vw;
   line-height: 2.6vw;
   font-size: 0.9375vw;
-  font-weight: 600;
+  /* font-weight: 600; */
 }
 .reagon-table-head .reagon-table-row .reagon-table-item, .reagon-table-body .reagon-table-row .reagon-table-item{
   text-align: center;
@@ -169,7 +172,7 @@
 .reagon-popup-info{
   color: #666666;
   font-size: 1.04vw;
-  font-weight: 600;
+  /* font-weight: 600; */
 }
 .reagon-popup-confirm{
   text-align: center;
@@ -200,31 +203,28 @@
 /* 弹窗表单 */
 .reagon-popup-main .el-form .el-form-item__label{
   font-size: 0.9375vw;
-  font-weight: 600;
+  /* font-weight: 600; */
   color: #666666;
-  width: 25%!important;
   height: 2vw;
   line-height: 2vw;
 }
 .reagon-popup-main .el-form .el-form-item__content{
-  margin-left: 25%!important;
-  height: 2vw;
   line-height: 2vw;
 }
 .reagon-popup-main .el-form .el-input, .reagon-popup-main .el-form .el-textarea{
   width: 65%;
 }
-.reagon-popup-main .el-form .el-input .el-input__inner{
+.reagon-popup-main .el-input .el-input__inner{
   height: 2vw;
   line-height: 2vw;
   font-size: 0.9375vw;
-  font-weight: 600;
+  /* font-weight: 600; */
   color: #666666;
 }
 .reagon-popup-main .el-form .el-textarea .el-textarea__inner{
   line-height: 2vw;
   font-size: 0.9375vw;
-  font-weight: 600;
+  /* font-weight: 600; */
   color: #666666;
 }
 .reagon-popup-main .el-form .el-form-item__error{
@@ -246,7 +246,7 @@
 }
 .reagon-popup-main .el-form .el-radio__label{
   font-size: 0.9375vw;
-  font-weight: 600;
+  /* font-weight: 600; */
   color: #666666;
 }
 .reagon-popup-main .el-select{
@@ -254,6 +254,9 @@
 }
 .reagon-popup-main .el-select .el-input{
   width: 100%;
+}
+.reagon-popup-main .el-select .el-input__icon{
+  line-height: 100%;
 }
 /* 数字升降按钮 */
 .el-input-number{
@@ -280,10 +283,10 @@
   top: auto;
 }
 /* 操作按钮 */
-.operation-cell{
+/* .operation-cell{
   display: flex!important;
-  justify-content: space-between;
-}
+  justify-content: center;
+} */
 .reagon-table-btn{
   color: #3B84C9;
   cursor: pointer;
@@ -331,8 +334,8 @@
   height: 1.875vw;
   line-height: 1.875vw;
   padding: 0 0.625vw;
-  font-size: 0.9375vw;
-  font-weight: 600;
+  font-size: 0.7292vw;
+  /* font-weight: 600; */
   color: #8A95A1;
 }
 .el-select-dropdown__item.selected,.el-select-dropdown__item.hover, .el-select-dropdown__item:hover{

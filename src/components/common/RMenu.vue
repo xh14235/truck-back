@@ -1,12 +1,11 @@
 <template>
   <div class="aside-wrapper" :style="{ width: wrapperWidth + 'vw' }">
-    <div class="aside-logo">
+    <div class="aside-logo" :style="{ 'padding-left': paddingLeft + 'vw' }">
       <img
         :src="require('../../assets/img/' + logoUrl + '.png')"
         alt=""
         class="reagon-logo-colour"
       />
-      <!-- {{ activeMenu1 }} -->
     </div>
     <div
       class="aside-menu"
@@ -15,18 +14,24 @@
       <div class="menu-box">
         <div
           class="menu-top"
-          :class="{ 'menu-active': activeMenu === 0 }"
-          @click="changeMenuAcitve(-1)"
+          :class="{ isCollapse: isCollapse, active: nowUrl === 0 }"
+          @click="toHome()"
         >
           <img src="../../assets/img/menu-home.png" alt="" class="menu-icon" />
           <span class="menu-title" v-show="!isCollapse">首页</span>
         </div>
       </div>
-      <div class="menu-box" v-for="(item, index) of menu" :key="item.url">
+      <div
+        class="menu-box"
+        v-for="(item, index) of menu"
+        :key="item.url"
+        @mouseenter="showChildren2(index)"
+        @mouseleave="hideChildren2(index)"
+      >
         <div
           class="menu-top"
-          :class="{ 'menu-active': activeMenu === index + 1 }"
-          @click="changeMenuAcitve(index)"
+          :class="{ isCollapse: isCollapse, active: nowUrl === index + 1 }"
+          @click="toggleChild(index)"
         >
           <img
             :src="require('../../assets/img/' + item.icon + '.png')"
@@ -34,41 +39,39 @@
             class="menu-icon"
           />
           <span class="menu-title" v-show="!isCollapse">{{ item.title }}</span>
+          <img
+            v-show="!isCollapse"
+            :class="{ active: item.active }"
+            src="../../assets/img/menu-arrow.png"
+            class="menu-arrow"
+          />
         </div>
-        <transition name="opacity">
+        <div class="menu-children" v-show="!isCollapse && item.active">
           <div
-            class="menu-children"
-            v-show="!isCollapse && activeMenu === index + 1"
+            class="menu-item"
+            :class="{ 'menu-active': menu2Active === '' + index + '' + index2 }"
+            v-for="(item2, index2) of item.children"
+            @click="changeUrl(item2.url, index, index2)"
+            :key="item2.url"
           >
+            <div class="menu-circle"></div>
+            <div>{{ item2.title }}</div>
+          </div>
+        </div>
+        <div class="menu-children2" v-show="isCollapse && item.active">
+          <div class="menu-children">
             <div
               class="menu-item"
               :class="{
-                active: littleMenu === '' + (index + 1) + index2
+                'menu-active': menu2Active === '' + index + '' + index2
               }"
               v-for="(item2, index2) of item.children"
+              @click="changeUrl(item2.url, index, index2)"
               :key="item2.url"
-              @click="changeUrl(item2.url, index2)"
             >
               <div class="menu-circle"></div>
               <div>{{ item2.title }}</div>
             </div>
-          </div>
-        </transition>
-        <div
-          class="menu-children menu-children2"
-          v-show="isCollapse && activeMenu === index + 1 && menuChildren2Show"
-        >
-          <div
-            class="menu-item"
-            :class="{
-              active: activeMenu === index + 1 && littleMenu === index2
-            }"
-            v-for="(item2, index2) of item.children"
-            :key="item2.url"
-            @click="changeUrl(item2.url, index2)"
-          >
-            <div class="menu-circle"></div>
-            <div>{{ item2.title }}</div>
           </div>
         </div>
       </div>
@@ -83,7 +86,8 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { getInfo } from "@/http/api";
+import { mapState, mapMutations } from "vuex";
 export default {
   name: "RMenu",
   data() {
@@ -92,15 +96,28 @@ export default {
       wrapperWidth: 15.625,
       menuWidth: 14,
       menuMarginRight: 0,
-      activeMenu: Number(sessionStorage.getItem("activeMenu")),
-      menuChildren2Show: false,
-      littleMenu: sessionStorage.getItem("littleMenu")
+      paddingLeft: 2.5
     };
   },
   computed: {
     ...mapState({
+      menu2Active: state => state.common.menu2Active,
       menu: state => state.common.menu
     }),
+    nowUrl() {
+      let url = this.$route.path;
+      let nowUrl;
+      if (url === "/") {
+        nowUrl = 0;
+      } else if (url.includes("user")) {
+        nowUrl = 1;
+      } else if (url.includes("account")) {
+        nowUrl = 2;
+      } else {
+        nowUrl = 3;
+      }
+      return nowUrl;
+    },
     logoUrl() {
       let url;
       if (this.isCollapse) {
@@ -112,37 +129,70 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(["mutMenu2Active"]),
     toggleMenu() {
+      for (let i = 0; i < this.menu.length; i++) {
+        if (!this.isCollapse) {
+          this.menu[i].active = false;
+        } else {
+          this.menu[i].active = true;
+        }
+      }
       this.isCollapse = !this.isCollapse;
       this.wrapperWidth = this.isCollapse ? 4.6875 : 15.625;
       this.menuWidth = this.isCollapse ? 3.125 : 14;
       this.menuMarginRight = this.isCollapse ? "auto" : 0;
-      this.menuChildren2Show = false;
+      this.paddingLeft = this.isCollapse ? 0.78125 : 2.5;
     },
-    changeMenuAcitve(index) {
-      if (this.activeMenu === index + 1) {
-        this.menuChildren2Show = !this.menuChildren2Show;
-      } else {
-        this.menuChildren2Show = true;
-      }
-      this.activeMenu = index + 1;
-      if (index === -1) {
-        sessionStorage.setItem("activeMenu", 0);
-        sessionStorage.setItem("littleMenu", 0);
-        this.$router.push("/");
+    toggleChild(index) {
+      if (!this.isCollapse) {
+        this.menu[index].active = !this.menu[index].active;
       }
     },
-    changeUrl(url, index) {
-      if (url.includes("user")) {
-        sessionStorage.setItem("activeMenu", 1);
-        this.littleMenu = "1" + index;
-      } else {
-        sessionStorage.setItem("activeMenu", 2);
-        this.littleMenu = "2" + index;
+    showChildren2(index) {
+      if (this.isCollapse) {
+        this.menu[index].active = true;
       }
-      sessionStorage.setItem("littleMenu", this.littleMenu);
-      this.menuChildren2Show = false;
+    },
+    hideChildren2(index) {
+      if (this.isCollapse) {
+        this.menu[index].active = false;
+      }
+    },
+    toHome() {
+      this.$router.push("/");
+      this.mutMenu2Active(0);
+    },
+    changeUrl(url, index, index2) {
       this.$router.push(url);
+      this.mutMenu2Active("" + index + "" + index2);
+    },
+    getMenu() {
+      getInfo().then(res => {
+        let menus = res.data.menus;
+        this.menu = [];
+        for (let i = 0; i < menus.length; i++) {
+          if (!menus[i].parentId) {
+            this.menu.push({
+              id: menus[i].id,
+              title: menus[i].title,
+              icon: menus[i].icon,
+              url: "/" + menus[i].name,
+              active: true,
+              children: []
+            });
+          } else {
+            for (let j = 0; j < this.menu.length; j++) {
+              if (menus[i].parentId === this.menu[j].id) {
+                this.menu[j].children.push({
+                  title: menus[i].title,
+                  url: this.menu[j].url + "/" + menus[i].name
+                });
+              }
+            }
+          }
+        }
+      });
     }
   }
 };
@@ -150,6 +200,26 @@ export default {
 
 <style lang="stylus" scoped>
 @import '~@/assets/css/common.styl'
+.menu-box >>> .menu-children
+  color: #fff
+  font-size: $font20
+  font-weight: 600
+  .menu-item
+    line-height: 3.125vw
+    padding-left: 2vw
+    cursor: pointer
+    display: flex
+    align-items: center
+    &.menu-active
+      color: $blue
+  .menu-circle
+    content: ''
+    display: block
+    width: 0.52vw
+    height: 0.52vw
+    background: #3B84C9
+    border-radius: 50%
+    margin-right: 1vw
 .aside-wrapper
   background: $mainDark
   display: flex
@@ -161,7 +231,7 @@ export default {
     height: $commonHeight
     display: flex
     align-items: center
-    justify-content: center
+    padding-left: 2.5vw
     .reagon-logo-colour
       height: 2.6vw
   .aside-menu
@@ -170,18 +240,23 @@ export default {
     transition: all 0.3s
     .menu-box
       width: 100%
-      margin-bottom: 1vw
+      margin-bottom: 0.78125vw
       position: relative
       .menu-top
         height: 3.125vw
         display: flex
         align-items: center
         background: linear-gradient(to right, rgba(169, 195, 227, 0.1), rgba(169, 195, 227, 0))
-        border-radius: 1.5625vw
+        border-radius: 1.5625vw 0 0 1.5625vw
         cursor: pointer
         padding: 0 1vw
-        &.menu-active
-          background: linear-gradient(to right, rgba(0, 134, 201, 1), rgba(0, 134, 201, 0))
+        &.active
+          background: linear-gradient(to right, rgba(0, 134, 201, 1) 0%, rgba(0, 134, 201, 1) 60%, rgba(0, 134, 201, 0) 100%)
+        &.isCollapse
+          border-radius: 1.5625vw
+          background: rgba(169, 195, 227, 0.1)
+          &.active
+            background: rgba(0, 134, 201, 1)
         .menu-icon
           height: 1.354vw
         .menu-title
@@ -190,34 +265,21 @@ export default {
           font-weight: 600
           margin-left: 1vw
           margin-right: auto
-      .menu-children
-        color: #fff
-        font-size: $font20
-        font-weight: 600
-        .menu-item
-          line-height: 2vw
-          padding-left: 2vw
-          cursor: pointer
-          display: flex
-          align-items: center
+        .menu-arrow
+          width: 1.354vw
+          transition: all 0.3s
           &.active
-            color: $blue
-        .menu-circle
-          content: ''
-          display: block
-          width: 0.52vw
-          height: 0.52vw
-          background: #3B84C9
-          border-radius: 50%
-          margin-right: 1vw
+            transform: rotate(540deg)
       .menu-children2
         position: absolute
         top: 0
-        left: calc(100% + 1vw)
+        left: 100%
         width: 12.5vw
-        padding: 1vw
-        background: $mainDark
         z-index: 1
+        .menu-children
+          background: $mainDark
+          margin-left: 1vw
+          padding: 1vw 1vw 1vw 0
   .aside-img
     align-self: center
     margin-bottom: 0.8854vw

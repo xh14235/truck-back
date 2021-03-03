@@ -13,7 +13,7 @@
     </div>
     <div class="add-button">
       <button class="search-btn search-query" @click="showRoleAddPopup">
-        <i class="el-icon-plus"></i> 添加账号
+        <i class="el-icon-plus"></i> 添加角色
       </button>
     </div>
     <div class="reagon-table-wrapper">
@@ -23,7 +23,7 @@
             <th class="reagon-table-item">编号</th>
             <th class="reagon-table-item">角色名称</th>
             <th class="reagon-table-item">描述</th>
-            <th class="reagon-table-item">用户数</th>
+            <!-- <th class="reagon-table-item">用户数</th> -->
             <th class="reagon-table-item">创建时间</th>
             <th class="reagon-table-item">是否启用</th>
             <th class="reagon-table-item">操作</th>
@@ -38,7 +38,7 @@
             <td class="reagon-table-item">{{ index + 1 }}</td>
             <td class="reagon-table-item">{{ item.name }}</td>
             <td class="reagon-table-item">{{ item.description }}</td>
-            <td class="reagon-table-item">{{ item.adminCount }}</td>
+            <!-- <td class="reagon-table-item">{{ item.adminCount }}</td> -->
             <td class="reagon-table-item">{{ changeTime(item.createTime) }}</td>
             <td class="reagon-table-item">
               <el-switch
@@ -69,6 +69,17 @@
         </tbody>
       </table>
     </div>
+    <div class="pagination-wrapper">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :page-sizes="[5, 10]"
+        :page-size="pageSize"
+        layout="total, prev, pager, next, sizes, jumper"
+        :total="total"
+      >
+      </el-pagination>
+    </div>
     <RoleAddPopup v-if="role.roleAddPopup"></RoleAddPopup>
     <RoleStatePopup :info="rowInfo" v-if="role.roleStatePopup"></RoleStatePopup>
     <RoleRevisePopup
@@ -93,7 +104,10 @@ export default {
     return {
       searchInfo: "",
       roleList: [],
-      rowInfo: {}
+      rowInfo: {},
+      total: 0,
+      pageNum: 1,
+      pageSize: 10
     };
   },
   components: {
@@ -124,6 +138,14 @@ export default {
       "showRoleMenuPopup",
       "showRoleRightPopup"
     ]),
+    handleSizeChange(e) {
+      this.pageSize = e;
+      this.search();
+    },
+    handleCurrentChange(e) {
+      this.pageNum = e;
+      this.search();
+    },
     changeTime(time) {
       return time.substring(0, 10) + " " + time.substring(11, 19);
     },
@@ -156,11 +178,12 @@ export default {
     getRoleList() {
       getRoleList({
         keyword: this.searchInfo,
-        pageNum: 1,
-        pageSize: 10
+        pageNum: this.pageNum,
+        pageSize: this.pageSize
       }).then(res => {
         if (res.code === 200) {
           this.roleList = res.data.list;
+          this.total = res.data.total;
         } else {
           this.roleList = [
             {

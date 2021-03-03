@@ -7,7 +7,7 @@
         <el-breadcrumb-item v-if="bread2">{{ bread2 }}</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-    <div class="header-username">你好，{{ username }}</div>
+    <div class="header-username">你好，{{ realName }}</div>
     <div class="header-logout" @click="logout">
       <img src="@/assets/img/logout.png" alt="" />
       退出
@@ -17,19 +17,37 @@
 
 <script>
 import { mapState } from "vuex";
+// import { getInfo } from "@/http/api";
 export default {
   name: "RHeader",
   data() {
     return {
       bread1: "",
       bread2: ""
+      // realName: "",
+      // menu: []
     };
   },
   computed: {
     ...mapState({
-      username: state => state.common.username,
+      roleChange: state => state.common.roleChange,
+      realName: state => state.common.realName,
       menu: state => state.common.menu
     }),
+    nowUrl() {
+      let url = this.$route.path;
+      let nowUrl;
+      if (url === "/") {
+        nowUrl = 0;
+      } else if (url.includes("user")) {
+        nowUrl = 1;
+      } else if (url.includes("account")) {
+        nowUrl = 2;
+      } else {
+        nowUrl = 3;
+      }
+      return nowUrl;
+    },
     hash() {
       return this.$route.fullPath;
     }
@@ -37,7 +55,16 @@ export default {
   watch: {
     hash() {
       this.changeBread();
+    },
+    roleChange() {
+      this.getMenu();
     }
+    // nowUrl() {
+    //   if (this.nowUrl !== 3) {
+    //     this.changeBread();
+    //     this.getMenu();
+    //   }
+    // }
   },
   methods: {
     changeBread() {
@@ -59,10 +86,41 @@ export default {
       sessionStorage.setItem("token", "");
       this.$store.state.common.token = "";
       this.$router.push("/login");
+    },
+    getMenu() {
+      // getInfo().then(res => {
+      // this.realName = res.data.realName;
+      // this.menu = [];
+      // let menus = res.data.menus;
+      // for (let i = 0; i < menus.length; i++) {
+      //   if (!menus[i].parentId) {
+      //     this.menu.push({
+      //       id: menus[i].id,
+      //       title: menus[i].title,
+      //       icon: menus[i].icon,
+      //       url: "/" + menus[i].name,
+      //       active: true,
+      //       children: []
+      //     });
+      //   } else {
+      //     for (let j = 0; j < this.menu.length; j++) {
+      //       if (menus[i].parentId === this.menu[j].id) {
+      //         this.menu[j].children.push({
+      //           title: menus[i].title,
+      //           url: this.menu[j].url + "/" + menus[i].name
+      //         });
+      //       }
+      //     }
+      //   }
+      // }
+      // });
     }
   },
   mounted() {
+    // if (this.nowUrl !== 3) {
     this.changeBread();
+    // this.getMenu();
+    // }
   }
 };
 </script>
