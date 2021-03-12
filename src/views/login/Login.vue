@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { login, getInfo } from "@/http/api";
+import { login, getInfo, getErrorMsg } from "@/http/api";
 import { mapMutations } from "vuex";
 export default {
   name: "Login",
@@ -128,7 +128,7 @@ export default {
           }, 100);
         } else {
           // 登录错误提示
-          this.errMsg = res.message;
+          this.errMsg = getErrorMsg(res);
         }
       });
     },

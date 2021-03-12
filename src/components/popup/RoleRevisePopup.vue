@@ -7,24 +7,24 @@
       </div>
       <div class="reagon-popup-main">
         <el-form
-          :model="info"
+          :model="ruleForm"
           :rules="rules"
           ref="ruleForm"
           label-width="100px"
           class="demo-ruleForm"
         >
           <el-form-item label="角色名称" prop="name">
-            <el-input v-model="info.name"></el-input>
+            <el-input v-model="ruleForm.name"></el-input>
           </el-form-item>
           <el-form-item label="描述" prop="description">
             <el-input
               type="textarea"
               :rows="3"
-              v-model="info.description"
+              v-model="ruleForm.description"
             ></el-input>
           </el-form-item>
           <el-form-item label="是否启用" prop="status">
-            <el-radio-group v-model="info.status">
+            <el-radio-group v-model="ruleForm.status">
               <el-radio :label="1">是</el-radio>
               <el-radio :label="0">否</el-radio>
             </el-radio-group>
@@ -41,42 +41,88 @@
 
 <script>
 import { mapMutations } from "vuex";
+import { getErrorMsg } from "@/http/api";
 import axios from "axios";
 export default {
   name: "RoleRevisePopup",
   props: {
-    info: Object
+    info: Object,
+    list: Array
   },
   data() {
+    let checkAccount = (rule, value, callback) => {
+      let ddd = 0;
+      for (let i = 0; i < this.list.length; i++) {
+        if (this.list[i].name === value && value !== this.info.name) {
+          ddd++;
+        } else {
+          ddd += 0;
+        }
+      }
+      if (ddd > 0) {
+        this.errMsg[0] = "该角色已存在";
+        callback(new Error(this.errMsg[0]));
+      } else {
+        this.errMsg[0] = "";
+      }
+      if (value === "") {
+        this.errMsg[1] = "请输入角色名称";
+        callback(new Error(this.errMsg[1]));
+      } else {
+        this.errMsg[1] = "";
+      }
+    };
     return {
+      errMsg: ["", ""],
+      errShow: false,
+      errIndex: 0,
       ruleForm: {
-        title: "",
-        des: "",
-        using: "是"
+        name: "",
+        description: "",
+        status: 1
       },
       rules: {
-        name: [{ required: true, message: "请输入角色名称", trigger: "blur" }],
-        description: [
-          { required: true, message: "请输入描述", trigger: "blur" }
-        ]
+        name: [{ required: true, validator: checkAccount, trigger: "blur" }]
       }
     };
   },
   methods: {
     ...mapMutations(["hidePopup", "mutRoleChange"]),
     confirm() {
-      axios
-        .post(
-          "http://116.236.30.222:9700/admin/role/update/" + this.info.id,
-          this.info
-        )
-        .then(res => {
-          if (res.data.code === 200) {
-            this.mutRoleChange();
-          }
+      this.errShow = false;
+      for (let i = 0; i < this.errMsg.length; i++) {
+        if (this.errMsg[i]) {
+          this.errShow = true;
+          this.errIndex = i;
+        }
+      }
+      if (this.errShow) {
+        this.$alert(this.errMsg[this.errIndex], "错误提示", {
+          confirmButtonText: "确定"
         });
-      this.hidePopup();
+      } else {
+        axios
+          .post(
+            "http://116.236.30.222:9700/admin/role/update/" + this.info.id,
+            this.ruleForm
+          )
+          .then(res => {
+            if (res.data.code === 200) {
+              this.mutRoleChange();
+            } else {
+              this.$alert("修改失败，" + getErrorMsg(res.data), "错误提示", {
+                confirmButtonText: "确定"
+              });
+            }
+          });
+        this.hidePopup();
+      }
     }
+  },
+  created() {
+    this.ruleForm.name = this.info.name;
+    this.ruleForm.description = this.info.description;
+    this.ruleForm.status = this.info.status;
   }
 };
 </script>

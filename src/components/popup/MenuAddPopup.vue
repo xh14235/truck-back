@@ -14,8 +14,8 @@
             label-width="100px"
             class="demo-ruleForm"
           >
-            <el-form-item label="菜单名称" prop="name">
-              <el-input v-model="ruleForm.name"></el-input>
+            <el-form-item label="菜单名称" prop="title">
+              <el-input v-model="ruleForm.title"></el-input>
             </el-form-item>
             <el-form-item label="上级菜单" prop="parentId">
               <el-select v-model="ruleForm.parentId" placeholder="请选择">
@@ -28,8 +28,8 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="前端名称" prop="title">
-              <el-input v-model="ruleForm.title"></el-input>
+            <el-form-item label="前端名称" prop="name">
+              <el-input v-model="ruleForm.name"></el-input>
             </el-form-item>
             <el-form-item label="前端图标" prop="icon">
               <el-input v-model="ruleForm.icon"></el-input>
@@ -60,47 +60,112 @@
 
 <script>
 import { mapMutations } from "vuex";
-import { createMenu } from "@/http/api";
+import { createMenu, getErrorMsg } from "@/http/api";
 export default {
   name: "MenuAddPopup",
   props: {
-    list: Array
+    list: Array,
+    array: Array
   },
   data() {
+    let checkTitle = (rule, value, callback) => {
+      let ddd = 0;
+      for (let i = 0; i < this.list.length; i++) {
+        if (this.list[i].title === value) {
+          ddd++;
+        } else {
+          ddd += 0;
+        }
+      }
+      if (ddd > 0) {
+        this.errMsg[0] = "该菜单名称已存在";
+        callback(new Error(this.errMsg[0]));
+      } else {
+        this.errMsg[0] = "";
+      }
+      if (value === "") {
+        this.errMsg[1] = "请输入菜单名称";
+        callback(new Error(this.errMsg[1]));
+      } else {
+        this.errMsg[1] = "";
+      }
+    };
+    let checkName = (rule, value, callback) => {
+      let ddd = 0;
+      for (let i = 0; i < this.list.length; i++) {
+        if (this.list[i].name === value) {
+          ddd++;
+        } else {
+          ddd += 0;
+        }
+      }
+      if (ddd > 0) {
+        this.errMsg[2] = "该前端名称已存在";
+        callback(new Error(this.errMsg[2]));
+      } else {
+        this.errMsg[2] = "";
+      }
+      if (value === "") {
+        this.errMsg[3] = "请输入前端名称";
+        callback(new Error(this.errMsg[3]));
+      } else {
+        this.errMsg[3] = "";
+      }
+    };
     return {
+      errMsg: ["", "", "", ""],
+      errShow: false,
+      errIndex: 0,
       ruleForm: {
-        name: "",
-        parentId: 0,
         title: "",
+        parentId: 0,
+        name: "",
         icon: "",
         sort: 0,
         hidden: 0
       },
       rules: {
-        name: [{ required: true, message: "请输入彩打 名称", trigger: "blur" }],
-        title: [{ required: true, message: "请输入前端名称", trigger: "blur" }]
+        name: [{ required: true, validator: checkName, trigger: "blur" }],
+        title: [{ required: true, validator: checkTitle, trigger: "blur" }]
       }
     };
   },
   methods: {
     ...mapMutations(["hidePopup", "mutMenuChange"]),
     confirm() {
-      createMenu({
-        createTime: new Date(),
-        hidden: this.ruleForm.hidden,
-        icon: this.ruleForm.icon,
-        id: 0,
-        level: 0,
-        name: this.ruleForm.name,
-        parentId: this.ruleForm.parentId,
-        sort: this.ruleForm.sort,
-        title: this.ruleForm.title
-      }).then(res => {
-        if (res.code === 200) {
-          this.mutMenuChange();
+      this.errShow = false;
+      for (let i = 0; i < this.errMsg.length; i++) {
+        if (this.errMsg[i]) {
+          this.errShow = true;
+          this.errIndex = i;
         }
-      });
-      this.hidePopup();
+      }
+      if (this.errShow) {
+        this.$alert(this.errMsg[this.errIndex], "错误提示", {
+          confirmButtonText: "确定"
+        });
+      } else {
+        createMenu({
+          createTime: new Date(),
+          hidden: this.ruleForm.hidden,
+          icon: this.ruleForm.icon,
+          id: 0,
+          level: 0,
+          name: this.ruleForm.name,
+          parentId: this.ruleForm.parentId,
+          sort: this.ruleForm.sort,
+          title: this.ruleForm.title
+        }).then(res => {
+          if (res.code === 200) {
+            this.mutMenuChange();
+          } else {
+            this.$alert("添加失败，" + getErrorMsg(res), "错误提示", {
+              confirmButtonText: "确定"
+            });
+          }
+        });
+        this.hidePopup();
+      }
     }
   }
 };

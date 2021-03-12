@@ -1,6 +1,11 @@
 import { get, post } from "./http";
 import qs from "qs";
 
+// 错误信息处理
+export const getErrorMsg = params => {
+  return params.message || params.errorMsg;
+};
+
 // 登录 获取token
 export const login = params => post("admin/admin/login", params);
 
@@ -60,3 +65,13 @@ export const getResourceByKeywords = params =>
 
 // 添加后台资源
 export const createResource = params => post("admin/resource/create", params);
+
+// 获取仪表仪器列表
+export const getEquipmentList = params => get("admin/admin/meter/list", params);
+
+// 添加新的仪器仪表
+export const addEquipment = params => post("admin/admin/meter/create", params);
+
+// 导出
+export const exportData = params =>
+  get("admin/admin/meter/export/excel", params);

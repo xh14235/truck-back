@@ -68,6 +68,7 @@
           </tr>
         </tbody>
       </table>
+      <div class="table-without-data" v-if="!roleList.length">暂无数据</div>
     </div>
     <div class="pagination-wrapper">
       <el-pagination
@@ -80,10 +81,11 @@
       >
       </el-pagination>
     </div>
-    <RoleAddPopup v-if="role.roleAddPopup"></RoleAddPopup>
+    <RoleAddPopup :list="roleList" v-if="role.roleAddPopup"></RoleAddPopup>
     <RoleStatePopup :info="rowInfo" v-if="role.roleStatePopup"></RoleStatePopup>
     <RoleRevisePopup
       :info="rowInfo"
+      :list="roleList"
       v-if="role.roleRevisePopup"
     ></RoleRevisePopup>
     <RoleDeletePopup
@@ -97,7 +99,7 @@
 
 <script>
 import { mapState, mapMutations } from "vuex";
-import { getRoleList } from "@/http/api";
+import { getRoleList, getErrorMsg } from "@/http/api";
 export default {
   naem: "RoleList",
   data() {
@@ -185,17 +187,9 @@ export default {
           this.roleList = res.data.list;
           this.total = res.data.total;
         } else {
-          this.roleList = [
-            {
-              adminCount: 0,
-              createTime: "2020-12-12",
-              description: "hsdlfjladkjf",
-              id: 0,
-              name: "管理员",
-              sort: 0,
-              status: 0
-            }
-          ];
+          this.$alert("请求列表失败，" + getErrorMsg(res), "错误提示", {
+            confirmButtonText: "确定"
+          });
         }
       });
     }

@@ -49,7 +49,7 @@
 
 <script>
 import { mapMutations } from "vuex";
-import { getMenuList, menuToRole } from "@/http/api";
+import { getMenuList, menuToRole, getErrorMsg } from "@/http/api";
 import axios from "axios";
 export default {
   name: "RolMenuPopup",
@@ -71,6 +71,10 @@ export default {
       menuToRole(param).then(res => {
         if (res.code === 200) {
           this.mutRoleChange();
+        } else {
+          this.$alert("分配失败，" + res.message, "错误提示", {
+            confirmButtonText: "确定"
+          });
         }
       });
       this.hidePopup();
@@ -88,7 +92,6 @@ export default {
           }
         }
       }
-      console.log(this.list2);
     },
     rightChange(e, item) {
       if (e) {
@@ -129,6 +132,10 @@ export default {
         for (let i = 0; i < data.length; i++) {
           if (data[i].hidden === 0) {
             this.list2.push(data[i].id);
+          } else {
+            this.$alert("分配失败" + getErrorMsg(res.data), "错误提示", {
+              confirmButtonText: "确定"
+            });
           }
         }
       });
@@ -140,8 +147,6 @@ export default {
 @import '~@/assets/css/common.styl'
 .el-checkbox-group >>> .el-checkbox__label
   font-size: 0.9375vw
-// .el-checkbox-group >>> .el-checkbox__input
-// vertical-align: bottom
 .el-checkbox-group >>> .el-checkbox__inner
   width: 0.9375vw
   height: 0.9375vw

@@ -20,30 +20,26 @@
 
 <script>
 import { mapMutations } from "vuex";
-import axios from "axios";
 import { getErrorMsg } from "@/http/api";
-import qs from "qs";
+import axios from "axios";
 export default {
-  name: "RoleStatePopup",
+  name: "EquipmentDeletePopup",
   props: {
     info: Object
   },
   methods: {
-    ...mapMutations(["hidePopup", "mutRoleChange"]),
+    ...mapMutations(["hidePopup", "mutEquipmentChange"]),
     confirm() {
       axios
         .post(
-          "http://116.236.30.222:9700/admin/role/updateStatus/" + this.info.id,
-          qs.stringify({
-            id: this.info.id,
-            status: this.info.status
-          })
+          "http://116.236.30.222:9700/admin/admin/meter/update/" + this.info.id,
+          this.info
         )
         .then(res => {
-          if (res.data.code === 200) {
-            this.mutRoleChange();
+          if (res.data.success) {
+            this.mutEquipmentChange();
           } else {
-            this.$alert("更改失败，" + getErrorMsg(res.data), "错误提示", {
+            this.$alert("改变失败，" + getErrorMsg(res.data), "错误提示", {
               confirmButtonText: "确定"
             });
           }
@@ -51,7 +47,7 @@ export default {
       this.hidePopup();
     },
     cancle() {
-      this.mutRoleChange();
+      this.mutEquipmentChange();
       this.hidePopup();
     }
   }

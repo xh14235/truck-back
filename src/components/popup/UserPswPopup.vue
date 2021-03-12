@@ -30,7 +30,7 @@
 
 <script>
 import { mapMutations } from "vuex";
-import { getRoleList } from "@/http/api";
+import { getRoleList, getErrorMsg } from "@/http/api";
 import axios from "axios";
 export default {
   name: "UserRolePopup",
@@ -40,24 +40,32 @@ export default {
   data() {
     var validatePass = (rule, value, callback) => {
       if (value === "") {
-        callback(new Error("请输入密码"));
+        this.errMsg[0] = "请输入密码";
+        callback(new Error(this.errMsg[0]));
       } else {
         if (this.newPsw.psw2 !== "") {
           this.$refs.newPsw.validateField("psw2");
         }
+        this.errMsg[0] = "";
         callback();
       }
     };
     var validatePass2 = (rule, value, callback) => {
       if (value === "") {
-        callback(new Error("请再次输入密码"));
+        this.errMsg[1] = "请再次输入密码";
+        callback(new Error(this.errMsg[1]));
       } else if (value !== this.newPsw.psw) {
-        callback(new Error("两次输入密码不一致!"));
+        this.errMsg[1] = "两次输入密码不一致";
+        callback(new Error(this.errMsg[1]));
       } else {
+        this.errMsg[1] = "";
         callback();
       }
     };
     return {
+      errMsg: ["", ""],
+      errShow: false,
+      errIndex: 0,
       newPsw: {
         psw: "",
         psw2: ""
@@ -72,17 +80,35 @@ export default {
     ...mapMutations(["hidePopup", "mutUserChange"]),
     confirm() {
       this.info.password = this.newPsw.psw;
-      axios
-        .post(
-          "http://116.236.30.222:9700/admin/admin/update/" + this.info.id,
-          this.info
-        )
-        .then(res => {
-          if (res.data.code === 200) {
-            this.mutUserChange();
-          }
+
+      this.errShow = false;
+      for (let i = 0; i < this.errMsg.length; i++) {
+        if (this.errMsg[i]) {
+          this.errShow = true;
+          this.errIndex = i;
+        }
+      }
+      if (this.errShow) {
+        this.$alert(this.errMsg[this.errIndex], "错误提示", {
+          confirmButtonText: "确定"
         });
-      this.hidePopup();
+      } else {
+        axios
+          .post(
+            "http://116.236.30.222:9700/admin/admin/update/" + this.info.id,
+            this.info
+          )
+          .then(res => {
+            if (res.data.code === 200) {
+              this.mutUserChange();
+            } else {
+              this.$alert("修改失败，" + getErrorMsg(res.data), "错误提示", {
+                confirmButtonText: "确定"
+              });
+            }
+          });
+        this.hidePopup();
+      }
     }
   },
   created() {

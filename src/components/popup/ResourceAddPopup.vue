@@ -51,11 +51,61 @@
 
 <script>
 import { mapMutations } from "vuex";
-import { getResourceType, createResource } from "@/http/api";
+import { getResourceType, createResource, getErrorMsg } from "@/http/api";
 export default {
   name: "ResourceAddPopup",
+  props: {
+    list: Array
+  },
   data() {
+    let checkName = (rule, value, callback) => {
+      let ddd = 0;
+      for (let i = 0; i < this.list.length; i++) {
+        if (this.list[i].name === value) {
+          ddd++;
+        } else {
+          ddd += 0;
+        }
+      }
+      if (ddd > 0) {
+        this.errMsg[0] = "该资源名称已存在";
+        callback(new Error(this.errMsg[0]));
+      } else {
+        this.errMsg[0] = "";
+      }
+      if (value === "") {
+        this.errMsg[1] = "请输入资源名称";
+        callback(new Error(this.errMsg[1]));
+      } else {
+        this.errMsg[1] = "";
+      }
+    };
+    let checkUrl = (rule, value, callback) => {
+      let ddd = 0;
+      for (let i = 0; i < this.list.length; i++) {
+        if (this.list[i].url === value) {
+          ddd++;
+        } else {
+          ddd += 0;
+        }
+      }
+      if (ddd > 0) {
+        this.errMsg[2] = "该路径已存在";
+        callback(new Error(this.errMsg[2]));
+      } else {
+        this.errMsg[2] = "";
+      }
+      if (value === "") {
+        this.errMsg[3] = "请输入路径";
+        callback(new Error(this.errMsg[3]));
+      } else {
+        this.errMsg[3] = "";
+      }
+    };
     return {
+      errMsg: ["", "", "", ""],
+      errShow: false,
+      errIndex: 0,
       options: [],
       ruleForm: {
         name: "",
@@ -64,54 +114,50 @@ export default {
         categoryId: ""
       },
       rules: {
-        title: [{ required: true, message: "请输入角色名称", trigger: "blur" }],
-        des: [{ required: true, message: "请输入描述", trigger: "blur" }]
+        name: [{ required: true, validator: checkName, trigger: "blur" }],
+        url: [{ required: true, validator: checkUrl, trigger: "blur" }]
       }
     };
   },
   methods: {
     ...mapMutations(["hidePopup", "mutResourceChange"]),
     confirm() {
-      createResource({
-        categoryId: this.ruleForm.categoryId,
-        createTime: new Date(),
-        description: this.ruleForm.description,
-        id: 0,
-        name: this.ruleForm.name,
-        url: this.ruleForm.url
-      }).then(res => {
-        if (res.code === 200) {
-          this.mutResourceChange();
+      this.errShow = false;
+      for (let i = 0; i < this.errMsg.length; i++) {
+        if (this.errMsg[i]) {
+          this.errShow = true;
+          this.errIndex = i;
         }
-      });
-      this.hidePopup();
+      }
+      if (this.errShow) {
+        this.$alert(this.errMsg[this.errIndex], "错误提示", {
+          confirmButtonText: "确定"
+        });
+      } else {
+        createResource({
+          categoryId: this.ruleForm.categoryId,
+          createTime: new Date(),
+          description: this.ruleForm.description,
+          id: 0,
+          name: this.ruleForm.name,
+          url: this.ruleForm.url
+        }).then(res => {
+          if (res.code === 200) {
+            this.mutResourceChange();
+          } else {
+            this.$alert("添加失败，" + getErrorMsg(res), "错误提示", {
+              confirmButtonText: "确定"
+            });
+          }
+        });
+        this.hidePopup();
+      }
     }
   },
   created() {
     getResourceType().then(res => {
       if (res.code === 200) {
         this.options = res.data;
-      } else {
-        this.options = [
-          {
-            createTime: "",
-            id: "",
-            name: "全部",
-            sort: "0"
-          },
-          {
-            createTime: "",
-            id: "",
-            name: "用户管理",
-            sort: "1"
-          },
-          {
-            createTime: "",
-            id: "",
-            name: "台账管理",
-            sort: "2"
-          }
-        ];
       }
       this.ruleForm.categoryId = this.options[0].id;
     });

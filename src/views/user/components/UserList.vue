@@ -69,6 +69,7 @@
           </tr>
         </tbody>
       </table>
+      <div class="table-without-data" v-if="!userList.length">暂无数据</div>
     </div>
     <div class="pagination-wrapper">
       <el-pagination
@@ -83,10 +84,11 @@
     </div>
     <UserStatePopup :info="rowInfo" v-if="user.userStatePopup"></UserStatePopup>
     <UserPswPopup :info="rowInfo" v-if="user.userPswPopup"></UserPswPopup>
-    <UserAddPopup v-if="user.userAddPopup"></UserAddPopup>
+    <UserAddPopup :list="userList" v-if="user.userAddPopup"></UserAddPopup>
     <UserRevisePopup
       v-if="user.userRevisePopup"
       :info="rowInfo"
+      :list="userList"
     ></UserRevisePopup>
     <UserDeletePopup
       v-if="user.userDeletePopup"
@@ -97,7 +99,7 @@
 
 <script>
 import { mapState, mapMutations } from "vuex";
-import { getUserList } from "@/http/api";
+import { getUserList, getErrorMsg } from "@/http/api";
 export default {
   name: "UserList",
   components: {
@@ -112,7 +114,6 @@ export default {
       searchInfo: "",
       userList: [],
       rowInfo: {},
-      updateNum: 0,
       total: 0,
       pageNum: 1,
       pageSize: 10
@@ -161,29 +162,9 @@ export default {
           this.userList = res.data.list;
           this.total = res.data.total;
         } else {
-          this.userList = [
-            {
-              city: "",
-              createBy: "",
-              createTime: "2020-12-12",
-              email: "12sd@222.com",
-              icon: "",
-              id: 0,
-              loginTime: "",
-              nickName: "",
-              note: "",
-              organizationId: 0,
-              password: "",
-              phone: "1253625642",
-              province: "",
-              realName: "张三",
-              status: 0,
-              type: "",
-              updateBy: "",
-              updateTime: "",
-              username: "test"
-            }
-          ];
+          this.$alert("请求列表失败，" + getErrorMsg(res), "错误提示", {
+            confirmButtonText: "确定"
+          });
         }
       });
     },

@@ -74,6 +74,7 @@
           </tr>
         </tbody>
       </table>
+      <div class="table-without-data" v-if="!menuList.length">暂无数据</div>
     </div>
     <div class="pagination-wrapper">
       <el-pagination
@@ -86,9 +87,15 @@
       >
       </el-pagination>
     </div>
-    <MenuAddPopup :list="selectList" v-if="menu.menuAddPopup"></MenuAddPopup>
+    <MenuAddPopup
+      :array="menuList"
+      :list="selectList"
+      v-if="menu.menuAddPopup"
+    ></MenuAddPopup>
     <MenuStatePopup :info="rowItem" v-if="menu.menuStatePopup"></MenuStatePopup>
     <MenuRevisePopup
+      :array="menuList"
+      :list="selectList"
       :info="rowItem"
       v-if="menu.menuRevisePopup"
     ></MenuRevisePopup>
@@ -102,7 +109,7 @@
 
 <script>
 import { mapState, mapMutations } from "vuex";
-import { getMenuList } from "@/http/api";
+import { getMenuList, getErrorMsg } from "@/http/api";
 import axios from "axios";
 export default {
   naem: "MenuList",
@@ -171,13 +178,19 @@ export default {
             this.selectList = [];
             this.selectList.push({
               id: 0,
+              name: "",
               title: "无上级菜单"
             });
             res.data.forEach(item => {
               this.selectList.push({
                 id: item.id,
+                name: item.name,
                 title: item.title
               });
+            });
+          } else {
+            this.$alert("请求列表失败，" + getErrorMsg(res), "错误提示", {
+              confirmButtonText: "确定"
             });
           }
         });
@@ -196,10 +209,20 @@ export default {
             }
           })
           .then(res => {
-            this.menuList = res.data.data.list;
-            this.total = res.data.data.total;
-            if (!this.menuList.length) {
-              this.getMenuList(1);
+            if (res.data.code === 200) {
+              this.menuList = res.data.data.list;
+              this.total = res.data.data.total;
+              if (!this.menuList.length) {
+                this.getMenuList(1);
+              }
+            } else {
+              this.$alert(
+                "请求列表失败，" + getErrorMsg(res.data),
+                "错误提示",
+                {
+                  confirmButtonText: "确定"
+                }
+              );
             }
           });
       }

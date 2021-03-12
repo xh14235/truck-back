@@ -29,7 +29,7 @@
 
 <script>
 import { mapMutations } from "vuex";
-import { getAllResource, ResourceToRole } from "@/http/api";
+import { getAllResource, ResourceToRole, getErrorMsg } from "@/http/api";
 import axios from "axios";
 export default {
   name: "RoleRightPopup",
@@ -51,6 +51,10 @@ export default {
       ResourceToRole(param).then(res => {
         if (res.code === 200) {
           this.mutRoleChange();
+        } else {
+          this.$alert("分配失败，" + getErrorMsg(res), "错误提示", {
+            confirmButtonText: "确定"
+          });
         }
       });
       this.hidePopup();

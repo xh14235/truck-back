@@ -26,6 +26,14 @@ const popup = {
       resourceAddPopup: false,
       resourceRevisePopup: false,
       resourceDeletePopup: false
+    },
+    equipment: {
+      equipmentAddPopup: false,
+      equipmentDeletePopup: false,
+      equipmentRevisePopup: false,
+      equipmentStatusPopup: false,
+      equipmentDetailPopup: false,
+      equipmentUploadPopup: false
     }
   },
   mutations: {
@@ -90,6 +98,25 @@ const popup = {
     showResourceDeletePopup(state) {
       state.resource.resourceDeletePopup = true;
     },
+    // 设备
+    showEquipmentAddPopup(state) {
+      state.equipment.equipmentAddPopup = true;
+    },
+    showEquipmentStatusPopup(state) {
+      state.equipment.equipmentStatusPopup = true;
+    },
+    showEquipmentDeletePopup(state) {
+      state.equipment.equipmentDeletePopup = true;
+    },
+    showEquipmentRevisePopup(state) {
+      state.equipment.equipmentRevisePopup = true;
+    },
+    showEquipmentDetailPopup(state) {
+      state.equipment.equipmentDetailPopup = true;
+    },
+    showEquipmentUploadPopup(state) {
+      state.equipment.equipmentUploadPopup = true;
+    },
     hidePopup(state) {
       // 用户
       state.user.userStatePopup = false;
@@ -114,6 +141,13 @@ const popup = {
       state.resource.resourceAddPopup = false;
       state.resource.resourceRevisePopup = false;
       state.resource.resourceDeletePopup = false;
+      // 设备
+      state.equipment.equipmentAddPopup = false;
+      state.equipment.equipmentDeletePopup = false;
+      state.equipment.equipmentRevisePopup = false;
+      state.equipment.equipmentStatusPopup = false;
+      state.equipment.equipmentDetailPopup = false;
+      state.equipment.equipmentUploadPopup = false;
     }
   }
 };

@@ -20,6 +20,7 @@
 
 <script>
 import { mapMutations } from "vuex";
+import { getErrorMsg } from "@/http/api";
 import axios from "axios";
 import qs from "qs";
 export default {
@@ -41,6 +42,10 @@ export default {
         .then(res => {
           if (res.data.code === 200) {
             this.mutUserChange();
+          } else {
+            this.$alert("改变失败，" + getErrorMsg(res.data), "错误提示", {
+              confirmButtonText: "确定"
+            });
           }
         });
       this.hidePopup();

@@ -20,7 +20,7 @@
 
 <script>
 import { mapMutations } from "vuex";
-import { deleteRole } from "@/http/api";
+import { deleteRole, getErrorMsg } from "@/http/api";
 export default {
   name: "RoleDeletePopup",
   props: {
@@ -35,6 +35,10 @@ export default {
         .then(res => {
           if (res.code === 200) {
             this.mutRoleChange();
+          } else {
+            this.$alert("删除失败，" + getErrorMsg(res), "错误提示", {
+              confirmButtonText: "确定"
+            });
           }
         })
         .catch(err => {

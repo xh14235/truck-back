@@ -20,6 +20,7 @@
 
 <script>
 import { mapMutations } from "vuex";
+import { getErrorMsg } from "@/http/api";
 import axios from "axios";
 export default {
   name: "ResourceDeletePopup",
@@ -37,8 +38,12 @@ export default {
           }
         )
         .then(res => {
-          if (res.data.code === 200) {
+          if (res.data.success) {
             this.mutResourceChange();
+          } else {
+            this.$alert("删除失败，" + getErrorMsg(res.data), "错误提示", {
+              confirmButtonText: "确定"
+            });
           }
         });
       this.hidePopup();

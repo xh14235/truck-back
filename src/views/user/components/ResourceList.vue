@@ -62,6 +62,7 @@
           </tr>
         </tbody>
       </table>
+      <div class="table-without-data" v-if="!resourceList.length">暂无数据</div>
     </div>
     <div class="pagination-wrapper">
       <el-pagination
@@ -78,9 +79,13 @@
       :info="rowInfo"
       v-if="resource.resourceDeletePopup"
     ></ResourceDeletePopup>
-    <ResourceAddPopup v-if="resource.resourceAddPopup"></ResourceAddPopup>
+    <ResourceAddPopup
+      :list="resourceList"
+      v-if="resource.resourceAddPopup"
+    ></ResourceAddPopup>
     <ResourceRevisePopup
       v-if="resource.resourceRevisePopup"
+      :list="resourceList"
       :info="rowInfo"
     ></ResourceRevisePopup>
   </div>
@@ -88,7 +93,11 @@
 
 <script>
 import { mapState, mapMutations } from "vuex";
-import { getResourceType, getResourceByKeywords } from "@/http/api";
+import {
+  getResourceType,
+  getResourceByKeywords,
+  getErrorMsg
+} from "@/http/api";
 export default {
   naem: "ResourceList",
   data() {
@@ -139,16 +148,9 @@ export default {
           this.resourceList = res.data.list;
           this.total = res.data.total;
         } else {
-          this.resourceList = [
-            {
-              categoryId: 0,
-              createTime: "2012:12:12",
-              description: "",
-              id: 0,
-              name: "后台用户管理",
-              url: "/admin"
-            }
-          ];
+          this.$alert("请求列表失败，" + getErrorMsg(res), "错误提示", {
+            confirmButtonText: "确定"
+          });
         }
       });
     },

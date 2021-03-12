@@ -13,20 +13,20 @@
           label-width="100px"
           class="demo-ruleForm"
         >
-          <el-form-item label="角色名称" prop="title">
-            <el-input v-model="ruleForm.title"></el-input>
+          <el-form-item label="角色名称" prop="name">
+            <el-input v-model="ruleForm.name"></el-input>
           </el-form-item>
-          <el-form-item label="描述" prop="des">
+          <el-form-item label="描述" prop="description">
             <el-input
               type="textarea"
               :rows="3"
-              v-model="ruleForm.des"
+              v-model="ruleForm.description"
             ></el-input>
           </el-form-item>
           <el-form-item label="是否启用" prop="using">
-            <el-radio-group v-model="ruleForm.using">
-              <el-radio label="是"></el-radio>
-              <el-radio label="否"></el-radio>
+            <el-radio-group v-model="ruleForm.status">
+              <el-radio :label="1">是</el-radio>
+              <el-radio :label="0">否</el-radio>
             </el-radio-group>
           </el-form-item>
         </el-form>
@@ -41,39 +41,83 @@
 
 <script>
 import { mapMutations } from "vuex";
-import { addRole } from "@/http/api";
+import { addRole, getErrorMsg } from "@/http/api";
 export default {
   name: "RoleAddPopup",
   data() {
-    return {
-      ruleForm: {
-        title: "",
-        des: "",
-        using: "是"
-      },
-      rules: {
-        title: [{ required: true, message: "请输入角色名称", trigger: "blur" }],
-        des: [{ required: true, message: "请输入描述", trigger: "blur" }]
+    let checkAccount = (rule, value, callback) => {
+      let ddd = 0;
+      for (let i = 0; i < this.list.length; i++) {
+        if (this.list[i].name === value) {
+          ddd++;
+        } else {
+          ddd += 0;
+        }
+      }
+      if (ddd > 0) {
+        this.errMsg[0] = "该角色已存在";
+        callback(new Error(this.errMsg[0]));
+      } else {
+        this.errMsg[0] = "";
+      }
+      if (value === "") {
+        this.errMsg[1] = "请输入角色名称";
+        callback(new Error(this.errMsg[1]));
+      } else {
+        this.errMsg[1] = "";
       }
     };
+    return {
+      errMsg: ["", ""],
+      errShow: false,
+      errIndex: 0,
+      ruleForm: {
+        name: "",
+        description: "",
+        status: 1
+      },
+      rules: {
+        name: [{ required: true, validator: checkAccount, trigger: "blur" }]
+      }
+    };
+  },
+  props: {
+    list: Array
   },
   methods: {
     ...mapMutations(["hidePopup", "mutRoleChange"]),
     confirm() {
-      addRole({
-        adminCount: 0,
-        createTime: new Date(),
-        description: this.ruleForm.des,
-        id: 0,
-        name: this.ruleForm.title,
-        sort: 0,
-        status: this.ruleForm.using === "是" ? 1 : 0
-      }).then(res => {
-        if (res.code === 200) {
-          this.mutRoleChange();
+      this.errShow = false;
+      for (let i = 0; i < this.errMsg.length; i++) {
+        if (this.errMsg[i]) {
+          this.errShow = true;
+          this.errIndex = i;
         }
-      });
-      this.hidePopup();
+      }
+      if (this.errShow) {
+        this.$alert(this.errMsg[this.errIndex], "错误提示", {
+          confirmButtonText: "确定"
+        });
+      } else {
+        addRole({
+          adminCount: 0,
+          createTime: new Date(),
+          description: this.ruleForm.description,
+          id: 0,
+          name: this.ruleForm.name,
+          sort: 0,
+          status: this.ruleForm.status
+        }).then(res => {
+          if (res.code === 200) {
+            this.mutRoleChange();
+          } else {
+            this.$alert("添加失败，" + getErrorMsg(res), "错误提示", {
+              confirmButtonText: "确定"
+            });
+          }
+        });
+        this.hidePopup();
+      }
     }
   }
 };
