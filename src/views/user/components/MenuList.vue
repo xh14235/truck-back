@@ -173,7 +173,7 @@ export default {
       this.level = 0;
       if (boo) {
         getMenuList().then(res => {
-          if (res.code === 200) {
+          if (res.success) {
             this.menuList = res.data;
             this.selectList = [];
             this.selectList.push({
@@ -189,9 +189,14 @@ export default {
               });
             });
           } else {
-            this.$alert("请求列表失败，" + getErrorMsg(res), "错误提示", {
-              confirmButtonText: "确定"
+            this.$message({
+              showClose: true,
+              message: "请求列表失败，" + getErrorMsg(res),
+              iconClass: "el-icon-warning"
             });
+            // this.$alert("请求列表失败，" + getErrorMsg(res), "错误提示", {
+            //   confirmButtonText: "确定"
+            // });
           }
         });
       }
@@ -209,7 +214,7 @@ export default {
             }
           })
           .then(res => {
-            if (res.data.code === 200) {
+            if (res.data.success) {
               this.menuList = res.data.data.list;
               this.total = res.data.data.total;
               if (!this.menuList.length) {

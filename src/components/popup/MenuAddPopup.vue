@@ -77,17 +77,13 @@ export default {
           ddd += 0;
         }
       }
-      if (ddd > 0) {
-        this.errMsg[0] = "该菜单名称已存在";
-        callback(new Error(this.errMsg[0]));
-      } else {
-        this.errMsg[0] = "";
-      }
       if (value === "") {
-        this.errMsg[1] = "请输入菜单名称";
-        callback(new Error(this.errMsg[1]));
+        callback(new Error("请输入菜单名称"));
       } else {
-        this.errMsg[1] = "";
+        if (ddd > 0) {
+          callback(new Error("该菜单名称已存在"));
+        }
+        callback();
       }
     };
     let checkName = (rule, value, callback) => {
@@ -99,23 +95,16 @@ export default {
           ddd += 0;
         }
       }
-      if (ddd > 0) {
-        this.errMsg[2] = "该前端名称已存在";
-        callback(new Error(this.errMsg[2]));
-      } else {
-        this.errMsg[2] = "";
-      }
       if (value === "") {
-        this.errMsg[3] = "请输入前端名称";
-        callback(new Error(this.errMsg[3]));
+        callback(new Error("请输入前端名称"));
       } else {
-        this.errMsg[3] = "";
+        if (ddd > 0) {
+          callback(new Error("该前端名称已存在"));
+        }
+        callback();
       }
     };
     return {
-      errMsg: ["", "", "", ""],
-      errShow: false,
-      errIndex: 0,
       ruleForm: {
         title: "",
         parentId: 0,
@@ -133,45 +122,40 @@ export default {
   methods: {
     ...mapMutations(["hidePopup", "mutMenuChange"]),
     confirm() {
-      this.errShow = false;
-      for (let i = 0; i < this.errMsg.length; i++) {
-        if (this.errMsg[i]) {
-          this.errShow = true;
-          this.errIndex = i;
+      this.$refs["ruleForm"].validate(valid => {
+        if (valid) {
+          createMenu({
+            // createTime: new Date(),
+            hidden: this.ruleForm.hidden,
+            icon: this.ruleForm.icon,
+            // id: 0,
+            level: 0,
+            name: this.ruleForm.name,
+            parentId: this.ruleForm.parentId,
+            sort: this.ruleForm.sort,
+            title: this.ruleForm.title
+          }).then(res => {
+            if (res.success) {
+              this.mutMenuChange();
+              this.hidePopup();
+            } else {
+              this.$message({
+                showClose: true,
+                message: "添加失败，" + getErrorMsg(res),
+                iconClass: "el-icon-warning"
+              });
+              // this.$alert("添加失败，" + getErrorMsg(res), "错误提示", {
+              //   confirmButtonText: "确定"
+              // });
+            }
+          });
+        } else {
+          return false;
         }
-      }
-      if (this.errShow) {
-        this.$alert(this.errMsg[this.errIndex], "错误提示", {
-          confirmButtonText: "确定"
-        });
-      } else {
-        createMenu({
-          createTime: new Date(),
-          hidden: this.ruleForm.hidden,
-          icon: this.ruleForm.icon,
-          id: 0,
-          level: 0,
-          name: this.ruleForm.name,
-          parentId: this.ruleForm.parentId,
-          sort: this.ruleForm.sort,
-          title: this.ruleForm.title
-        }).then(res => {
-          if (res.code === 200) {
-            this.mutMenuChange();
-          } else {
-            this.$alert("添加失败，" + getErrorMsg(res), "错误提示", {
-              confirmButtonText: "确定"
-            });
-          }
-        });
-        this.hidePopup();
-      }
+      });
     }
   }
 };
 </script>
 
-<style lang="stylus" scoped>
-.el-select
-  width: 100%
-</style>
+<style lang="stylus" scoped></style>

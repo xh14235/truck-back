@@ -39,9 +39,14 @@ export default {
           if (res.data.success) {
             this.mutEquipmentChange();
           } else {
-            this.$alert("改变失败，" + getErrorMsg(res.data), "错误提示", {
-              confirmButtonText: "确定"
+            this.$message({
+              showClose: true,
+              message: "更改失败，" + getErrorMsg(res.data),
+              iconClass: "el-icon-warning"
             });
+            // this.$alert("改变失败，" + getErrorMsg(res.data), "错误提示", {
+            //   confirmButtonText: "确定"
+            // });
           }
         });
       this.hidePopup();

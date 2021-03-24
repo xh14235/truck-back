@@ -10,7 +10,7 @@
           :model="ruleForm"
           ref="ruleForm"
           :rules="rules"
-          label-width="45%"
+          label-width="50%"
         >
           <el-form-item label="管理编号" prop="number">
             <el-input v-model="ruleForm.number"></el-input>
@@ -41,6 +41,8 @@
               v-model="ruleForm.enabledTime"
               type="date"
               placeholder="选择日期"
+              :clearable="false"
+              value-format="yyyy-MM-dd hh:mm:ss"
             >
             </el-date-picker>
           </el-form-item>
@@ -88,6 +90,8 @@
               v-model="ruleForm.checkTime"
               type="date"
               placeholder="选择日期"
+              :clearable="false"
+              value-format="yyyy-MM-dd hh:mm:ss"
             >
             </el-date-picker>
           </el-form-item>
@@ -148,23 +152,72 @@ export default {
           ddd += 0;
         }
       }
-      if (ddd > 0) {
-        this.errMsg[0] = "该编号已存在";
-        callback(new Error(this.errMsg[0]));
-      } else {
-        this.errMsg[0] = "";
-      }
       if (value === "") {
-        this.errMsg[1] = "请输入编号";
-        callback(new Error(this.errMsg[1]));
+        callback(new Error("请输入编号"));
       } else {
-        this.errMsg[1] = "";
+        if (ddd > 0) {
+          callback(new Error("该编号已存在"));
+        }
+        callback();
+      }
+    };
+    let checkAccuracyLevel = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("请输入精度等级"));
+      } else {
+        callback();
+      }
+    };
+    let checkBuildingName = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("请输入建筑名称"));
+      } else {
+        callback();
+      }
+    };
+    let checkEnabledTime = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("请输入启用日期"));
+      } else {
+        callback();
+      }
+    };
+    let checkFloor = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("请输入安装楼层"));
+      } else {
+        callback();
+      }
+    };
+    let checkPosition = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("请输入测点安装位置"));
+      } else {
+        callback();
+      }
+    };
+    let checkSerialNumber = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("请输入出厂编号"));
+      } else {
+        callback();
+      }
+    };
+    let checkName = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("请输入仪表名称"));
+      } else {
+        callback();
+      }
+    };
+    let checkType = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("请输入计量能源种类"));
+      } else {
+        callback();
       }
     };
     return {
-      errMsg: ["", ""],
-      errShow: false,
-      errIndex: 0,
       ruleForm: {
         accuracyLevel: "",
         buildingName: "",
@@ -203,42 +256,58 @@ export default {
         usedDepartment: ""
       },
       rules: {
-        number: [{ required: true, validator: checkNumber, trigger: "blur" }]
+        number: [{ required: true, validator: checkNumber, trigger: "blur" }],
+        accuracyLevel: [
+          { required: true, validator: checkAccuracyLevel, trigger: "blur" }
+        ],
+        buildingName: [
+          { required: true, validator: checkBuildingName, trigger: "blur" }
+        ],
+        enabledTime: [
+          { required: true, validator: checkEnabledTime, trigger: "blur" }
+        ],
+        floor: [{ required: true, validator: checkFloor, trigger: "blur" }],
+        position: [
+          { required: true, validator: checkPosition, trigger: "blur" }
+        ],
+        serialNumber: [
+          { required: true, validator: checkSerialNumber, trigger: "blur" }
+        ],
+        name: [{ required: true, validator: checkName, trigger: "blur" }],
+        type: [{ required: true, validator: checkType, trigger: "blur" }]
       }
     };
   },
   methods: {
     ...mapMutations(["hidePopup", "mutEquipmentChange"]),
     confirm() {
-      this.errShow = false;
-      for (let i = 0; i < this.errMsg.length; i++) {
-        if (this.errMsg[i]) {
-          this.errShow = true;
-          this.errIndex = i;
+      this.$refs["ruleForm"].validate(valid => {
+        if (valid) {
+          axios
+            .post(
+              "http://116.236.30.222:9700/admin/admin/meter/update/" +
+                this.info.id,
+              this.ruleForm
+            )
+            .then(res => {
+              if (res.data.success) {
+                this.mutEquipmentChange();
+                this.hidePopup();
+              } else {
+                this.$message({
+                  showClose: true,
+                  message: "修改失败，" + getErrorMsg(res.data),
+                  iconClass: "el-icon-warning"
+                });
+                // this.$alert("修改失败，" + getErrorMsg(res.data), "错误提示", {
+                //   confirmButtonText: "确定"
+                // });
+              }
+            });
+        } else {
+          return false;
         }
-      }
-      if (this.errShow) {
-        this.$alert(this.errMsg[this.errIndex], "错误提示", {
-          confirmButtonText: "确定"
-        });
-      } else {
-        axios
-          .post(
-            "http://116.236.30.222:9700/admin/admin/meter/update/" +
-              this.info.id,
-            this.ruleForm
-          )
-          .then(res => {
-            if (res.data.success) {
-              this.mutEquipmentChange();
-            } else {
-              this.$alert("修改失败，" + getErrorMsg(res.data), "错误提示", {
-                confirmButtonText: "确定"
-              });
-            }
-          });
-        this.hidePopup();
-      }
+      });
     }
   },
   created() {
@@ -253,10 +322,10 @@ export default {
 @import '~@/assets/css/common.styl'
 .el-form >>> .el-input
   width: 100%
-.el-form >>> .el-input-number
-  width: 75%
+// .el-form >>> .el-input-number
+// width: 75%
 .el-form >>> .el-input-number-label
-  font-size: $font18
+  font-size: $font14
 .el-form >>> .el-form-item__error
   top: 100%
   left: 0
@@ -266,7 +335,7 @@ export default {
   font-size: 12px
   font-weight: normal
 .reagon-popup-wrapper
-  width: 48vw
+  width: 38vw
   .reagon-popup-main
     max-height: 35vw
     overflow-y: scroll

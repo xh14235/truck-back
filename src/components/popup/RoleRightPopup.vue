@@ -49,19 +49,24 @@ export default {
       param.append("resourceIds", this.list2);
       param.append("roleId", this.info.id);
       ResourceToRole(param).then(res => {
-        if (res.code === 200) {
+        if (res.success) {
           this.mutRoleChange();
         } else {
-          this.$alert("分配失败，" + getErrorMsg(res), "错误提示", {
-            confirmButtonText: "确定"
+          this.$message({
+            showClose: true,
+            message: "分配失败，" + getErrorMsg(res),
+            iconClass: "el-icon-warning"
           });
+          // this.$alert("分配失败，" + getErrorMsg(res), "错误提示", {
+          //   confirmButtonText: "确定"
+          // });
         }
       });
       this.hidePopup();
     },
     getResourceList() {
       getAllResource().then(res => {
-        if (res.code === 200) {
+        if (res.success) {
           this.list = res.data;
         } else {
           this.list = [
@@ -83,10 +88,12 @@ export default {
           "http://116.236.30.222:9700/admin/role/listResource/" + this.info.id
         )
         .then(res => {
-          let data = res.data.data;
-          this.list2 = [];
-          for (let i = 0; i < data.length; i++) {
-            this.list2.push(data[i].id);
+          if (res.data.success) {
+            let data = res.data.data;
+            this.list2 = [];
+            for (let i = 0; i < data.length; i++) {
+              this.list2.push(data[i].id);
+            }
           }
         });
     }
@@ -100,17 +107,10 @@ export default {
 
 <style lang="stylus" scoped>
 .el-checkbox-group >>> .el-checkbox__label
-  font-size: 0.9375vw
-// .el-checkbox-group >>> .el-checkbox__input
-// vertical-align: bottom
+  font-size: 0.7292vw
 .el-checkbox-group >>> .el-checkbox__inner
-  width: 0.9375vw
-  height: 0.9375vw
-.el-checkbox-group >>> .el-checkbox__inner::after
-  width: 0.3125vw
-  height: 0.625vw
-  left: 0.25vw
-  top: 0
+  width: 0.7292vw
+  height: 0.7292vw
 .el-checkbox-group
   margin: 0 auto
   width: 17.8125vw
@@ -120,5 +120,5 @@ export default {
     flex: 0 0 50%
     width: 50%
     margin-right: 0
-    margin-bottom: 0.677vw
+    margin-bottom: 0.8333vw
 </style>

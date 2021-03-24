@@ -59,23 +59,16 @@ export default {
           ddd += 0;
         }
       }
-      if (ddd > 0) {
-        this.errMsg[0] = "该角色已存在";
-        callback(new Error(this.errMsg[0]));
+      if (!value) {
+        callback(new Error("请输入角色名称"));
       } else {
-        this.errMsg[0] = "";
-      }
-      if (value === "") {
-        this.errMsg[1] = "请输入角色名称";
-        callback(new Error(this.errMsg[1]));
-      } else {
-        this.errMsg[1] = "";
+        if (ddd > 0) {
+          callback(new Error("该账号已存在"));
+        }
+        callback();
       }
     };
     return {
-      errMsg: ["", ""],
-      errShow: false,
-      errIndex: 0,
       ruleForm: {
         name: "",
         description: "",
@@ -89,34 +82,32 @@ export default {
   methods: {
     ...mapMutations(["hidePopup", "mutRoleChange"]),
     confirm() {
-      this.errShow = false;
-      for (let i = 0; i < this.errMsg.length; i++) {
-        if (this.errMsg[i]) {
-          this.errShow = true;
-          this.errIndex = i;
+      this.$refs["ruleForm"].validate(valid => {
+        if (valid) {
+          axios
+            .post(
+              "http://116.236.30.222:9700/admin/role/update/" + this.info.id,
+              this.ruleForm
+            )
+            .then(res => {
+              if (res.data.success) {
+                this.mutRoleChange();
+                this.hidePopup();
+              } else {
+                this.$message({
+                  showClose: true,
+                  message: "删除失败，" + getErrorMsg(res.data),
+                  iconClass: "el-icon-warning"
+                });
+                // this.$alert("修改失败，" + getErrorMsg(res.data), "错误提示", {
+                //   confirmButtonText: "确定"
+                // });
+              }
+            });
+        } else {
+          return false;
         }
-      }
-      if (this.errShow) {
-        this.$alert(this.errMsg[this.errIndex], "错误提示", {
-          confirmButtonText: "确定"
-        });
-      } else {
-        axios
-          .post(
-            "http://116.236.30.222:9700/admin/role/update/" + this.info.id,
-            this.ruleForm
-          )
-          .then(res => {
-            if (res.data.code === 200) {
-              this.mutRoleChange();
-            } else {
-              this.$alert("修改失败，" + getErrorMsg(res.data), "错误提示", {
-                confirmButtonText: "确定"
-              });
-            }
-          });
-        this.hidePopup();
-      }
+      });
     }
   },
   created() {

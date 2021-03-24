@@ -10,7 +10,6 @@ export const getErrorMsg = params => {
 export const login = params => post("admin/admin/login", params);
 
 // 获取登录信息
-
 export const getInfo = params => get("admin/admin/info", params);
 
 // 获取用户列表

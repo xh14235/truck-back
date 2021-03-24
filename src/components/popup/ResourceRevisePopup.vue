@@ -69,20 +69,17 @@ export default {
           ddd += 0;
         }
       }
-      if (ddd > 0) {
-        this.errMsg[0] = "该资源名称已存在";
-        callback(new Error(this.errMsg[0]));
-      } else {
-        this.errMsg[0] = "";
-      }
       if (value === "") {
-        this.errMsg[1] = "请输入资源名称";
-        callback(new Error(this.errMsg[1]));
+        callback(new Error("请输入资源名称"));
       } else {
-        this.errMsg[1] = "";
+        if (ddd > 0) {
+          callback(new Error("该资源名称已存在"));
+        }
+        callback();
       }
     };
     let checkUrl = (rule, value, callback) => {
+      console.log(value);
       let ddd = 0;
       for (let i = 0; i < this.list.length; i++) {
         if (this.list[i].url === value && value !== this.info.url) {
@@ -91,31 +88,24 @@ export default {
           ddd += 0;
         }
       }
-      if (ddd > 0) {
-        this.errMsg[2] = "该路径已存在";
-        callback(new Error(this.errMsg[2]));
-      } else {
-        this.errMsg[2] = "";
-      }
       if (value === "") {
-        this.errMsg[3] = "请输入路径";
-        callback(new Error(this.errMsg[3]));
+        callback(new Error("请输入路径"));
       } else {
-        this.errMsg[3] = "";
+        if (ddd > 0) {
+          callback(new Error("该路径已存在"));
+        }
+        callback();
       }
     };
     return {
-      errMsg: ["", "", "", ""],
-      errShow: false,
-      errIndex: 0,
-      options: [],
       ruleForm: {
         createTime: "",
         id: 0,
         name: "",
         sort: 0,
         categoryId: "",
-        description: ""
+        description: "",
+        url: ""
       },
       rules: {
         name: [{ required: true, validator: checkName, trigger: "blur" }],
@@ -126,39 +116,38 @@ export default {
   methods: {
     ...mapMutations(["hidePopup", "mutResourceChange"]),
     confirm() {
-      this.errShow = false;
-      for (let i = 0; i < this.errMsg.length; i++) {
-        if (this.errMsg[i]) {
-          this.errShow = true;
-          this.errIndex = i;
+      this.$refs["ruleForm"].validate(valid => {
+        if (valid) {
+          axios
+            .post(
+              "http://116.236.30.222:9700/admin/resource/update/" +
+                this.info.id,
+              this.ruleForm
+            )
+            .then(res => {
+              if (res.data.success) {
+                this.mutResourceChange();
+                this.hidePopup();
+              } else {
+                this.$message({
+                  showClose: true,
+                  message: "修改失败，" + getErrorMsg(res.data),
+                  iconClass: "el-icon-warning"
+                });
+                // this.$alert("修改失败，" + getErrorMsg(res.data), "错误提示", {
+                //   confirmButtonText: "确定"
+                // });
+              }
+            });
+        } else {
+          return false;
         }
-      }
-      if (this.errShow) {
-        this.$alert(this.errMsg[this.errIndex], "错误提示", {
-          confirmButtonText: "确定"
-        });
-      } else {
-        axios
-          .post(
-            "http://116.236.30.222:9700/admin/resource/update/" + this.info.id,
-            this.ruleForm
-          )
-          .then(res => {
-            if (res.data.code === 200) {
-              this.mutResourceChange();
-            } else {
-              this.$alert("修改失败，" + getErrorMsg(res.data), "错误提示", {
-                confirmButtonText: "确定"
-              });
-            }
-          });
-        this.hidePopup();
-      }
+      });
     }
   },
   created() {
     getResourceType().then(res => {
-      if (res.code === 200) {
+      if (res.success) {
         this.options = res.data;
       } else {
         this.options = [

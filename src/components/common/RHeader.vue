@@ -17,20 +17,17 @@
 
 <script>
 import { mapState } from "vuex";
-// import { getInfo } from "@/http/api";
 export default {
   name: "RHeader",
   data() {
     return {
       bread1: "",
       bread2: ""
-      // realName: "",
-      // menu: []
     };
   },
   computed: {
     ...mapState({
-      roleChange: state => state.common.roleChange,
+      // roleChange: state => state.common.roleChange,
       realName: state => state.common.realName,
       menu: state => state.common.menu
     }),
@@ -55,15 +52,9 @@ export default {
   watch: {
     hash() {
       this.changeBread();
-    },
-    roleChange() {
-      this.getMenu();
     }
-    // nowUrl() {
-    //   if (this.nowUrl !== 3) {
-    //     this.changeBread();
-    //     this.getMenu();
-    //   }
+    // roleChange() {
+    //   this.getMenu();
     // }
   },
   methods: {
@@ -86,77 +77,46 @@ export default {
       sessionStorage.setItem("token", "");
       this.$store.state.common.token = "";
       this.$router.push("/login");
-    },
-    getMenu() {
-      // getInfo().then(res => {
-      // this.realName = res.data.realName;
-      // this.menu = [];
-      // let menus = res.data.menus;
-      // for (let i = 0; i < menus.length; i++) {
-      //   if (!menus[i].parentId) {
-      //     this.menu.push({
-      //       id: menus[i].id,
-      //       title: menus[i].title,
-      //       icon: menus[i].icon,
-      //       url: "/" + menus[i].name,
-      //       active: true,
-      //       children: []
-      //     });
-      //   } else {
-      //     for (let j = 0; j < this.menu.length; j++) {
-      //       if (menus[i].parentId === this.menu[j].id) {
-      //         this.menu[j].children.push({
-      //           title: menus[i].title,
-      //           url: this.menu[j].url + "/" + menus[i].name
-      //         });
-      //       }
-      //     }
-      //   }
-      // }
-      // });
     }
   },
   mounted() {
-    // if (this.nowUrl !== 3) {
     this.changeBread();
-    // this.getMenu();
-    // }
   }
 };
 </script>
 
 <style lang="stylus" scoped>
 @import '~@/assets/css/common.styl'
+.header-breadcrumb >>> .is-link
+  font-weight: 400
 .header-breadcrumb >>> .el-breadcrumb__separator
-  font-weight: 600
+  font-weight: 400
   color: $fontCommon
 .header-breadcrumb >>> .el-breadcrumb__inner
-  font-weight: 600
+  // font-weight: 600
   color: $fontCommon
 .header-wrapper
   flex: 0 0 $commonHeight
   display: flex
   width: 100%
-  padding: 0 2.34375vw 0 1.823vw
+  padding: 0 2.083vw
   height: $commonHeight
   background: $white
   justify-content: space-between
   align-items: center
   color: $fontCommon
-  font-size: $font20
+  font-size: $font16
   .header-breadcrumb
     margin-right: auto
     .el-breadcrumb
-      font-size: $font20
+      font-size: $font16
   .header-username
-    margin-right: 1.823vw
-    font-weight: 600
+    margin-right: 1.4583vw
   .header-logout
     display: flex
     align-items: center
     cursor: pointer
-    font-weight: 600
     img
-      height: 1.25vw
+      height: 0.9vw
       margin-right: 0.3vw
 </style>

@@ -67,17 +67,13 @@ export default {
           ddd += 0;
         }
       }
-      if (ddd > 0) {
-        this.errMsg[0] = "该资源名称已存在";
-        callback(new Error(this.errMsg[0]));
-      } else {
-        this.errMsg[0] = "";
-      }
       if (value === "") {
-        this.errMsg[1] = "请输入资源名称";
-        callback(new Error(this.errMsg[1]));
+        callback(new Error("请输入资源名称"));
       } else {
-        this.errMsg[1] = "";
+        if (ddd > 0) {
+          callback(new Error("该资源名称已存在"));
+        }
+        callback();
       }
     };
     let checkUrl = (rule, value, callback) => {
@@ -89,23 +85,16 @@ export default {
           ddd += 0;
         }
       }
-      if (ddd > 0) {
-        this.errMsg[2] = "该路径已存在";
-        callback(new Error(this.errMsg[2]));
-      } else {
-        this.errMsg[2] = "";
-      }
       if (value === "") {
-        this.errMsg[3] = "请输入路径";
-        callback(new Error(this.errMsg[3]));
+        callback(new Error("请输入路径"));
       } else {
-        this.errMsg[3] = "";
+        if (ddd > 0) {
+          callback(new Error("该路径已存在"));
+        }
+        callback();
       }
     };
     return {
-      errMsg: ["", "", "", ""],
-      errShow: false,
-      errIndex: 0,
       options: [],
       ruleForm: {
         name: "",
@@ -122,41 +111,39 @@ export default {
   methods: {
     ...mapMutations(["hidePopup", "mutResourceChange"]),
     confirm() {
-      this.errShow = false;
-      for (let i = 0; i < this.errMsg.length; i++) {
-        if (this.errMsg[i]) {
-          this.errShow = true;
-          this.errIndex = i;
+      this.$refs["ruleForm"].validate(valid => {
+        if (valid) {
+          createResource({
+            categoryId: this.ruleForm.categoryId,
+            createTime: new Date(),
+            description: this.ruleForm.description,
+            id: 0,
+            name: this.ruleForm.name,
+            url: this.ruleForm.url
+          }).then(res => {
+            if (res.success) {
+              this.mutResourceChange();
+              this.hidePopup();
+            } else {
+              this.$message({
+                showClose: true,
+                message: "添加失败，" + getErrorMsg(res),
+                iconClass: "el-icon-warning"
+              });
+              // this.$alert("添加失败，" + getErrorMsg(res), "错误提示", {
+              //   confirmButtonText: "确定"
+              // });
+            }
+          });
+        } else {
+          return false;
         }
-      }
-      if (this.errShow) {
-        this.$alert(this.errMsg[this.errIndex], "错误提示", {
-          confirmButtonText: "确定"
-        });
-      } else {
-        createResource({
-          categoryId: this.ruleForm.categoryId,
-          createTime: new Date(),
-          description: this.ruleForm.description,
-          id: 0,
-          name: this.ruleForm.name,
-          url: this.ruleForm.url
-        }).then(res => {
-          if (res.code === 200) {
-            this.mutResourceChange();
-          } else {
-            this.$alert("添加失败，" + getErrorMsg(res), "错误提示", {
-              confirmButtonText: "确定"
-            });
-          }
-        });
-        this.hidePopup();
-      }
+      });
     }
   },
   created() {
     getResourceType().then(res => {
-      if (res.code === 200) {
+      if (res.success) {
         this.options = res.data;
       }
       this.ruleForm.categoryId = this.options[0].id;

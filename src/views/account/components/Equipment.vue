@@ -13,7 +13,7 @@
     </div>
     <div class="add-button">
       <button class="search-btn" @click="showEquipmentAddPopup">
-        <i class="el-icon-plus"></i> 添加账号
+        <i class="el-icon-plus"></i> 添加仪表
       </button>
       <button class="search-btn search-import" @click="exportData()">
         <i class="el-icon-printer"></i> 导出
@@ -40,6 +40,7 @@
             <th class="reagon-table-item">精度等级</th>
             <th class="reagon-table-item">状态</th>
             <th class="reagon-table-item">操作</th>
+            <!-- <th class="reagon-table-item"></th> -->
           </tr>
         </thead>
         <tbody class="reagon-table-body">
@@ -75,6 +76,7 @@
                 >删除</span
               >
             </td>
+            <!-- <td></td> -->
           </tr>
         </tbody>
       </table>
@@ -195,9 +197,14 @@ export default {
           this.eqiupmentList = res.data.list;
           this.total = res.data.total;
         } else {
-          this.$alert("请求列表失败，" + getErrorMsg(res), "错误提示", {
-            confirmButtonText: "确定"
+          this.$message({
+            showClose: true,
+            message: "请求列表失败，" + getErrorMsg(res),
+            iconClass: "el-icon-warning"
           });
+          // this.$alert("请求列表失败，" + getErrorMsg(res), "错误提示", {
+          //   confirmButtonText: "确定"
+          // });
         }
       });
     },

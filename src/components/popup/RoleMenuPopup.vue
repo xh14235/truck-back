@@ -69,12 +69,17 @@ export default {
       param.append("menuIds", this.list2);
       param.append("roleId", this.info.id);
       menuToRole(param).then(res => {
-        if (res.code === 200) {
+        if (res.success) {
           this.mutRoleChange();
         } else {
-          this.$alert("分配失败，" + res.message, "错误提示", {
-            confirmButtonText: "确定"
+          this.$message({
+            showClose: true,
+            message: "分配失败，" + getErrorMsg(res),
+            iconClass: "el-icon-warning"
           });
+          // this.$alert("分配失败，" + res.message, "错误提示", {
+          //   confirmButtonText: "确定"
+          // });
         }
       });
       this.hidePopup();
@@ -127,15 +132,13 @@ export default {
         roleId: this.info.id
       })
       .then(res => {
-        let data = res.data.data;
-        this.list2 = [];
-        for (let i = 0; i < data.length; i++) {
-          if (data[i].hidden === 0) {
-            this.list2.push(data[i].id);
-          } else {
-            this.$alert("分配失败" + getErrorMsg(res.data), "错误提示", {
-              confirmButtonText: "确定"
-            });
+        if (res.data.success) {
+          let data = res.data.data;
+          this.list2 = [];
+          for (let i = 0; i < data.length; i++) {
+            if (data[i].hidden === 0) {
+              this.list2.push(data[i].id);
+            }
           }
         }
       });
@@ -146,24 +149,20 @@ export default {
 <style lang="stylus" scoped>
 @import '~@/assets/css/common.styl'
 .el-checkbox-group >>> .el-checkbox__label
-  font-size: 0.9375vw
+  font-size: 0.7292vw
 .el-checkbox-group >>> .el-checkbox__inner
-  width: 0.9375vw
-  height: 0.9375vw
-.el-checkbox-group >>> .el-checkbox__inner::after
-  width: 0.3125vw
-  height: 0.625vw
-  left: 0.25vw
-  top: 0
+  width: 0.7292vw
+  height: 0.7292vw
 .check-group-wrapper
-  margin-top: 1.458vw
+  margin-bottom: 1.6667vw
 .check-group
   margin: 0 auto
+  margin-bottom: 1.6667vw
   width: 17.8125vw
   display: flex
   flex-wrap: wrap
   &.check-title
-    font-size: 0.9375vw
+    font-size: 0.7292vw
     color: $tableHead
     .check-group-left, .check-group-right
       padding-left: 1.458vw
@@ -172,8 +171,9 @@ export default {
     width: 50%
   .check-group-right
     .el-checkbox
-      font-size: 0.9375vw
+      font-size: 0.7292vw
+      margin-bottom: 0.8333vw
       width: 100%
       .el-checkbox__label
-        font-size: 0.9375vw
+        font-size: 0.7292vw
 </style>

@@ -54,23 +54,16 @@ export default {
           ddd += 0;
         }
       }
-      if (ddd > 0) {
-        this.errMsg[0] = "该角色已存在";
-        callback(new Error(this.errMsg[0]));
+      if (!value) {
+        callback(new Error("请输入角色名称"));
       } else {
-        this.errMsg[0] = "";
-      }
-      if (value === "") {
-        this.errMsg[1] = "请输入角色名称";
-        callback(new Error(this.errMsg[1]));
-      } else {
-        this.errMsg[1] = "";
+        if (ddd > 0) {
+          callback(new Error("该账号已存在"));
+        }
+        callback();
       }
     };
     return {
-      errMsg: ["", ""],
-      errShow: false,
-      errIndex: 0,
       ruleForm: {
         name: "",
         description: "",
@@ -86,38 +79,60 @@ export default {
   },
   methods: {
     ...mapMutations(["hidePopup", "mutRoleChange"]),
+    // getTime() {
+    //   let time = new Date();
+    //   let year = time.getFullYear();
+    //   let month = time.getMonth() + 1;
+    //   month = month > 9 ? month : "0" + month;
+    //   let day = time.getDate();
+    //   day = day > 9 ? day : "0" + day;
+    //   let hour = time.getHours();
+    //   hour = hour > 9 ? hour : "0" + hour;
+    //   let minute = time.getMinutes();
+    //   minute = minute > 9 ? minute : "0" + minute;
+    //   let second = time.getSeconds();
+    //   second = second > 9 ? second : "0" + second;
+    //   return (
+    //     year +
+    //     "-" +
+    //     month +
+    //     "-" +
+    //     day +
+    //     " " +
+    //     hour +
+    //     ":" +
+    //     minute +
+    //     ":" +
+    //     second
+    //   );
+    // },
     confirm() {
-      this.errShow = false;
-      for (let i = 0; i < this.errMsg.length; i++) {
-        if (this.errMsg[i]) {
-          this.errShow = true;
-          this.errIndex = i;
+      this.$refs["ruleForm"].validate(valid => {
+        if (valid) {
+          addRole({
+            adminCount: 0,
+            // createTime: new Date(),
+            description: this.ruleForm.description,
+            id: 0,
+            name: this.ruleForm.name,
+            sort: 0,
+            status: this.ruleForm.status
+          }).then(res => {
+            if (res.success) {
+              this.mutRoleChange();
+              this.hidePopup();
+            } else {
+              this.$message({
+                showClose: true,
+                message: "添加失败，" + getErrorMsg(res),
+                iconClass: "el-icon-warning"
+              });
+            }
+          });
+        } else {
+          return false;
         }
-      }
-      if (this.errShow) {
-        this.$alert(this.errMsg[this.errIndex], "错误提示", {
-          confirmButtonText: "确定"
-        });
-      } else {
-        addRole({
-          adminCount: 0,
-          createTime: new Date(),
-          description: this.ruleForm.description,
-          id: 0,
-          name: this.ruleForm.name,
-          sort: 0,
-          status: this.ruleForm.status
-        }).then(res => {
-          if (res.code === 200) {
-            this.mutRoleChange();
-          } else {
-            this.$alert("添加失败，" + getErrorMsg(res), "错误提示", {
-              confirmButtonText: "确定"
-            });
-          }
-        });
-        this.hidePopup();
-      }
+      });
     }
   }
 };

@@ -158,12 +158,14 @@ export default {
         pageNum: this.pageNum,
         pageSize: this.pageSize
       }).then(res => {
-        if (res.code === 200) {
+        if (res.success) {
           this.userList = res.data.list;
           this.total = res.data.total;
         } else {
-          this.$alert("请求列表失败，" + getErrorMsg(res), "错误提示", {
-            confirmButtonText: "确定"
+          this.$message({
+            showClose: true,
+            message: "请求列表失败，" + getErrorMsg(res),
+            iconClass: "el-icon-warning"
           });
         }
       });

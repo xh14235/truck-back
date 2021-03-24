@@ -1,5 +1,6 @@
 import axios from "axios";
 import store from "@/store/index";
+import router from "@/router";
 
 axios.defaults.baseURL = "http://116.236.30.222:9700/";
 axios.defaults.timeout = 20000;
@@ -18,6 +19,7 @@ axios.interceptors.request.use(
 
 axios.interceptors.response.use(response => {
   if (response.status === 200) {
+    if (response.data.errorCode === 401) router.push("/login");
     return Promise.resolve(response);
   } else {
     return Promise.reject(response);

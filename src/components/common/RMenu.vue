@@ -140,7 +140,7 @@ export default {
       }
       this.isCollapse = !this.isCollapse;
       this.wrapperWidth = this.isCollapse ? 4.6875 : 15.625;
-      this.menuWidth = this.isCollapse ? 3.125 : 14;
+      this.menuWidth = this.isCollapse ? 2.604 : 14;
       this.menuMarginRight = this.isCollapse ? "auto" : 0;
       this.paddingLeft = this.isCollapse ? 0.78125 : 2.5;
     },
@@ -202,11 +202,12 @@ export default {
 @import '~@/assets/css/common.styl'
 .menu-box >>> .menu-children
   color: #fff
-  font-size: $font20
+  font-size: $font16
   font-weight: 600
+  padding: 0.625px 0
   .menu-item
-    line-height: 3.125vw
-    padding-left: 2vw
+    line-height: 2.5vw
+    padding-left: 1.5vw
     cursor: pointer
     display: flex
     align-items: center
@@ -237,23 +238,24 @@ export default {
   .aside-menu
     margin-bottom: auto
     margin-left: auto
+    margin-top: 1.302vw
     transition: all 0.3s
     .menu-box
       width: 100%
       margin-bottom: 0.78125vw
       position: relative
       .menu-top
-        height: 3.125vw
+        height: 2.604vw
         display: flex
         align-items: center
         background: linear-gradient(to right, rgba(169, 195, 227, 0.1), rgba(169, 195, 227, 0))
-        border-radius: 1.5625vw 0 0 1.5625vw
+        border-radius: 1.302vw 0 0 1.302vw
         cursor: pointer
-        padding: 0 1vw
+        padding: 0 0.625vw
         &.active
           background: linear-gradient(to right, rgba(0, 134, 201, 1) 0%, rgba(0, 134, 201, 1) 60%, rgba(0, 134, 201, 0) 100%)
         &.isCollapse
-          border-radius: 1.5625vw
+          border-radius: 1.302vw
           background: rgba(169, 195, 227, 0.1)
           &.active
             background: rgba(0, 134, 201, 1)
@@ -261,9 +263,9 @@ export default {
           height: 1.354vw
         .menu-title
           color: #fff
-          font-size: $font20
+          font-size: $font16
           font-weight: 600
-          margin-left: 1vw
+          margin-left: 1.0417vw
           margin-right: auto
         .menu-arrow
           width: 1.354vw
@@ -273,7 +275,7 @@ export default {
       .menu-children2
         position: absolute
         top: 0
-        left: 100%
+        left: 110%
         width: 12.5vw
         z-index: 1
         .menu-children

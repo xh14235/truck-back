@@ -11,7 +11,7 @@
             :model="ruleForm"
             :rules="rules"
             ref="ruleForm"
-            label-width="25%"
+            label-width="30%"
             class="demo-ruleForm"
           >
             <el-form-item label="账号" prop="username">
@@ -47,8 +47,8 @@
         </div>
       </div>
       <div class="reagon-popup-bottom">
-        <div class="reagon-popup-btn" @click="confirm()">确定</div>
-        <div class="reagon-popup-btn" @click="hidePopup()">取消</div>
+        <div class="reagon-popup-btn" @click="submitForm()">确定</div>
+        <div class="reagon-popup-btn" @click="resetForm()">取消</div>
       </div>
     </div>
   </div>
@@ -65,7 +65,7 @@ export default {
     list: Array
   },
   data() {
-    let checkUsername = (rule, value, callback) => {
+    let checkAccount = (rule, value, callback) => {
       let ddd = 0;
       for (let i = 0; i < this.list.length; i++) {
         if (this.list[i].username === value && value !== this.info.username) {
@@ -74,39 +74,30 @@ export default {
           ddd += 0;
         }
       }
-      if (ddd > 0) {
-        this.errMsg[0] = "该账号已存在";
-        callback(new Error(this.errMsg[0]));
+      if (!value) {
+        callback(new Error("请输入账号"));
       } else {
-        this.errMsg[0] = "";
-      }
-      if (value === "") {
-        this.errMsg[1] = "请输入账号";
-        callback(new Error(this.errMsg[1]));
-      } else {
-        this.errMsg[1] = "";
+        if (ddd > 0) {
+          callback(new Error("该账号已存在"));
+        }
+        callback();
       }
     };
     let checkPhone = (rule, value, callback) => {
-      if (!this.phoneReg.test(value)) {
-        this.errMsg[2] = "请输入11位手机号码";
-        callback(new Error(this.errMsg[2]));
+      if (value && !this.phoneReg.test(value)) {
+        callback(new Error("请输入11位手机号码"));
       } else {
-        this.errMsg[2] = "";
+        callback();
       }
     };
     let checkEmail = (rule, value, callback) => {
-      if (!this.emailReg.test(value)) {
-        this.errMsg[3] = "请输入正确的邮箱";
-        callback(new Error(this.errMsg[3]));
+      if (value && !this.emailReg.test(value)) {
+        callback(new Error("请输入正确的邮箱"));
       } else {
-        this.errMsg[3] = "";
+        callback();
       }
     };
     return {
-      errMsg: ["", "", "", ""],
-      errShow: false,
-      errIndex: 0,
       phoneReg: /^[1][3,4,5,7,8,9][0-9]{9}$/,
       emailReg: /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/,
       options: [],
@@ -125,7 +116,7 @@ export default {
       },
       rules: {
         username: [
-          { required: true, validator: checkUsername, trigger: "blur" }
+          { required: true, validator: checkAccount, trigger: "blur" }
         ],
         phone: [{ validator: checkPhone, trigger: "blur" }],
         email: [{ validator: checkEmail, trigger: "blur" }]
@@ -134,35 +125,34 @@ export default {
   },
   methods: {
     ...mapMutations(["hidePopup", "mutUserChange"]),
-    confirm() {
-      this.errShow = false;
-      for (let i = 0; i < this.errMsg.length; i++) {
-        if (this.errMsg[i]) {
-          this.errShow = true;
-          this.errIndex = i;
+    submitForm() {
+      this.$refs["ruleForm"].validate(valid => {
+        if (valid) {
+          axios
+            .post(
+              "http://116.236.30.222:9700/admin/admin/update/" + this.info.id,
+              this.ruleForm
+            )
+            .then(res => {
+              if (res.data.success) {
+                this.mutUserChange();
+                this.hidePopup();
+              } else {
+                this.$message({
+                  showClose: true,
+                  message: "修改失败，" + getErrorMsg(res.data),
+                  iconClass: "el-icon-warning"
+                });
+              }
+            });
+        } else {
+          return false;
         }
-      }
-      if (this.errShow) {
-        this.$alert(this.errMsg[this.errIndex], "错误提示", {
-          confirmButtonText: "确定"
-        });
-      } else {
-        axios
-          .post(
-            "http://116.236.30.222:9700/admin/admin/update/" + this.info.id,
-            this.ruleForm
-          )
-          .then(res => {
-            if (res.data.code === 200) {
-              this.mutUserChange();
-            } else {
-              this.$alert("修改失败，" + getErrorMsg(res.data), "错误提示", {
-                confirmButtonText: "确定"
-              });
-            }
-          });
-        this.hidePopup();
-      }
+      });
+    },
+    resetForm() {
+      this.$refs["ruleForm"].resetFields();
+      this.hidePopup();
     }
   },
   created() {

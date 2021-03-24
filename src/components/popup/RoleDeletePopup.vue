@@ -33,12 +33,17 @@ export default {
         ids: this.info.id
       })
         .then(res => {
-          if (res.code === 200) {
+          if (res.success) {
             this.mutRoleChange();
           } else {
-            this.$alert("删除失败，" + getErrorMsg(res), "错误提示", {
-              confirmButtonText: "确定"
+            this.$message({
+              showClose: true,
+              message: "删除失败，" + getErrorMsg(res),
+              iconClass: "el-icon-warning"
             });
+            // this.$alert("删除失败，" + getErrorMsg(res), "错误提示", {
+            //   confirmButtonText: "确定"
+            // });
           }
         })
         .catch(err => {

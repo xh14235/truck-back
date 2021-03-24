@@ -144,13 +144,18 @@ export default {
         pageNum: this.pageNum,
         pageSize: this.pageSize
       }).then(res => {
-        if (res.code === 200) {
+        if (res.success) {
           this.resourceList = res.data.list;
           this.total = res.data.total;
         } else {
-          this.$alert("请求列表失败，" + getErrorMsg(res), "错误提示", {
-            confirmButtonText: "确定"
+          this.$message({
+            showClose: true,
+            message: "请求列表失败，" + getErrorMsg(res),
+            iconClass: "el-icon-warning"
           });
+          // this.$alert("请求列表失败，" + getErrorMsg(res), "错误提示", {
+          //   confirmButtonText: "确定"
+          // });
         }
       });
     },
@@ -171,7 +176,7 @@ export default {
     },
     getResourceType() {
       getResourceType().then(res => {
-        if (res.code === 200) {
+        if (res.success) {
           this.options = res.data;
         } else {
           this.options = [
@@ -218,8 +223,7 @@ export default {
 <style lang="stylus" scoped>
 @import '~@/assets/css/common.styl'
 .select-info
-  font-size: $font18
+  font-size: $font14
   margin: 0 1.3vw
-  font-weight: 600
   color: $fontCommon
 </style>

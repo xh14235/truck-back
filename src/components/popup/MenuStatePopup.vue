@@ -40,12 +40,17 @@ export default {
           })
         )
         .then(res => {
-          if (res.data.code === 200) {
+          if (res.data.success) {
             this.mutMenuChange();
           } else {
-            this.$alert("更改失败，" + getErrorMsg(res.data), "错误提示", {
-              confirmButtonText: "确定"
+            this.$message({
+              showClose: true,
+              message: "更改失败，" + getErrorMsg(res.data),
+              iconClass: "el-icon-warning"
             });
+            // this.$alert("更改失败，" + getErrorMsg(res.data), "错误提示", {
+            //   confirmButtonText: "确定"
+            // });
           }
         });
       this.hidePopup();

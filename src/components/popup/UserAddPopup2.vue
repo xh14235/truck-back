@@ -44,8 +44,8 @@
         </el-form>
       </div>
       <div class="reagon-popup-bottom">
-        <div class="reagon-popup-btn" @click="submitForm()">确定</div>
-        <div class="reagon-popup-btn" @click="resetForm()">取消</div>
+        <div class="reagon-popup-btn" @click="confirm()">确定</div>
+        <div class="reagon-popup-btn" @click="hidePopup()">取消</div>
       </div>
     </div>
   </div>
@@ -59,10 +59,13 @@ export default {
   data() {
     let psw2 = (rule, value, callback) => {
       if (value === "") {
-        callback(new Error("请重复输入密码"));
+        this.errMsg[0] = "请重复输入密码";
+        callback(new Error(this.errMsg[0]));
       } else if (value !== this.ruleForm.psw) {
-        callback(new Error("两次输入密码不一致"));
+        this.errMsg[0] = "两次输入密码不一致";
+        callback(new Error(this.errMsg[0]));
       } else {
+        this.errMsg[0] = "";
         callback();
       }
     };
@@ -75,37 +78,47 @@ export default {
           ddd += 0;
         }
       }
-      if (!value) {
-        callback(new Error("请输入账号"));
+      if (ddd > 0) {
+        this.errMsg[1] = "该账号已存在";
+        callback(new Error(this.errMsg[1]));
       } else {
-        if (ddd > 0) {
-          callback(new Error("该账号已存在"));
-        }
-        callback();
+        this.errMsg[1] = "";
+      }
+      if (value === "") {
+        this.errMsg[2] = "请输入账号";
+        callback(new Error(this.errMsg[2]));
+      } else {
+        this.errMsg[2] = "";
       }
     };
     let checkPhone = (rule, value, callback) => {
-      if (value && !this.phoneReg.test(value)) {
-        callback(new Error("请输入11位手机号码"));
+      if (!this.phoneReg.test(value)) {
+        this.errMsg[3] = "请输入11位手机号码";
+        callback(new Error(this.errMsg[3]));
       } else {
-        callback();
+        this.errMsg[3] = "";
       }
     };
     let checkEmail = (rule, value, callback) => {
-      if (value && !this.emailReg.test(value)) {
-        callback(new Error("请输入正确的邮箱"));
+      if (!this.emailReg.test(value)) {
+        this.errMsg[4] = "请输入正确的邮箱";
+        callback(new Error(this.errMsg[4]));
       } else {
-        callback();
+        this.errMsg[4] = "";
       }
     };
     let psw = (rule, value, callback) => {
       if (!value) {
-        callback(new Error("请输入密码"));
+        this.errMsg[5] = "请输入密码";
+        callback(new Error(this.errMsg[5]));
       } else {
-        callback();
+        this.errMsg[5] = "";
       }
     };
     return {
+      errMsg: ["", "", "", "", "", ""],
+      errShow: false,
+      errIndex: 0,
       phoneReg: /^[1][3,4,5,7,8,9][0-9]{9}$/,
       emailReg: /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/,
       ruleForm: {
@@ -134,42 +147,43 @@ export default {
   },
   methods: {
     ...mapMutations(["hidePopup", "mutUserChange"]),
-    submitForm() {
-      this.$refs["ruleForm"].validate(valid => {
-        if (valid) {
-          addUser({
-            city: "",
-            icon: "",
-            nickName: "",
-            note: "",
-            organizationId: 0,
-            province: "",
-            username: this.ruleForm.username,
-            realName: this.ruleForm.realName,
-            roleId: this.ruleForm.roleId,
-            password: this.$getRsaCode(this.ruleForm.psw),
-            phone: this.ruleForm.phone,
-            email: this.ruleForm.email
-          }).then(res => {
-            if (res.success) {
-              this.mutUserChange();
-              this.hidePopup();
-            } else {
-              this.$message({
-                showClose: true,
-                message: "添加失败，" + getErrorMsg(res),
-                iconClass: "el-icon-warning"
-              });
-            }
-          });
-        } else {
-          return false;
+    confirm() {
+      this.errShow = false;
+      for (let i = 0; i < this.errMsg.length; i++) {
+        if (this.errMsg[i]) {
+          this.errShow = true;
+          this.errIndex = i;
         }
-      });
-    },
-    resetForm() {
-      this.$refs["ruleForm"].resetFields();
-      this.hidePopup();
+      }
+      if (this.errShow) {
+        this.$alert(this.errMsg[this.errIndex], "错误提示", {
+          confirmButtonText: "确定"
+        });
+      } else {
+        addUser({
+          city: "",
+          icon: "",
+          nickName: "",
+          note: "",
+          organizationId: 0,
+          province: "",
+          username: this.ruleForm.username,
+          realName: this.ruleForm.realName,
+          roleId: this.ruleForm.roleId,
+          password: this.$getRsaCode(this.ruleForm.psw),
+          phone: this.ruleForm.phone,
+          email: this.ruleForm.email
+        }).then(res => {
+          if (res.success) {
+            this.mutUserChange();
+          } else {
+            this.$alert("添加失败，" + getErrorMsg(res), "错误提示", {
+              confirmButtonText: "确定"
+            });
+          }
+        });
+        this.hidePopup();
+      }
     }
   },
   created() {
@@ -184,7 +198,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" scoped>
-.disabled
-  color: red
-</style>
+<style lang="stylus" scoped></style>

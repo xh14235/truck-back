@@ -79,17 +79,13 @@ export default {
           ddd += 0;
         }
       }
-      if (ddd > 0) {
-        this.errMsg[0] = "该菜单名称已存在";
-        callback(new Error(this.errMsg[0]));
-      } else {
-        this.errMsg[0] = "";
-      }
       if (value === "") {
-        this.errMsg[1] = "请输入菜单名称";
-        callback(new Error(this.errMsg[1]));
+        callback(new Error("请输入菜单名称"));
       } else {
-        this.errMsg[1] = "";
+        if (ddd > 0) {
+          callback(new Error("该菜单名称已存在"));
+        }
+        callback();
       }
     };
     let checkName = (rule, value, callback) => {
@@ -101,23 +97,16 @@ export default {
           ddd += 0;
         }
       }
-      if (ddd > 0) {
-        this.errMsg[2] = "该前端名称已存在";
-        callback(new Error(this.errMsg[2]));
-      } else {
-        this.errMsg[2] = "";
-      }
       if (value === "") {
-        this.errMsg[3] = "请输入前端名称";
-        callback(new Error(this.errMsg[3]));
+        callback(new Error("请输入前端名称"));
       } else {
-        this.errMsg[3] = "";
+        if (ddd > 0) {
+          callback(new Error("该前端名称已存在"));
+        }
+        callback();
       }
     };
     return {
-      errMsg: ["", "", "", ""],
-      errShow: false,
-      errIndex: 0,
       ruleForm: {
         createTime: "",
         hidden: 0,
@@ -138,34 +127,32 @@ export default {
   methods: {
     ...mapMutations(["hidePopup", "mutMenuChange"]),
     confirm() {
-      this.errShow = false;
-      for (let i = 0; i < this.errMsg.length; i++) {
-        if (this.errMsg[i]) {
-          this.errShow = true;
-          this.errIndex = i;
+      this.$refs["ruleForm"].validate(valid => {
+        if (valid) {
+          axios
+            .post(
+              "http://116.236.30.222:9700/admin/menu/update/" + this.info.id,
+              this.ruleForm
+            )
+            .then(res => {
+              if (res.data.success) {
+                this.mutMenuChange();
+                this.hidePopup();
+              } else {
+                this.$message({
+                  showClose: true,
+                  message: "修改失败，" + getErrorMsg(res.data),
+                  iconClass: "el-icon-warning"
+                });
+                // this.$alert("修改失败，" + getErrorMsg(res.data), "错误提示", {
+                //   confirmButtonText: "确定"
+                // });
+              }
+            });
+        } else {
+          return false;
         }
-      }
-      if (this.errShow) {
-        this.$alert(this.errMsg[this.errIndex], "错误提示", {
-          confirmButtonText: "确定"
-        });
-      } else {
-        axios
-          .post(
-            "http://116.236.30.222:9700/admin/menu/update/" + this.info.id,
-            this.ruleForm
-          )
-          .then(res => {
-            if (res.data.code === 200) {
-              this.mutMenuChange();
-            } else {
-              this.$alert("修改失败，" + getErrorMsg(res.data), "错误提示", {
-                confirmButtonText: "确定"
-              });
-            }
-          });
-        this.hidePopup();
-      }
+      });
     }
   },
   created() {

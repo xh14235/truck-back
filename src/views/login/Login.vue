@@ -11,7 +11,13 @@
       </div>
       <div class="login-box-right">
         <div class="login-title">后台管理系统</div>
-        <el-form class="login-form" :model="loginForm" :rules="loginRules">
+        <div class="login-title2">Backgrund Management System</div>
+        <el-form
+          class="login-form"
+          ref="ruleForm"
+          :model="loginForm"
+          :rules="loginRules"
+        >
           <el-form-item prop="username">
             <el-input
               v-model="loginForm.username"
@@ -46,7 +52,7 @@
           />
           <label for="checkbox">记住密码</label>
         </div>
-        <button class="login-button" @click="handleLogin">登 录</button>
+        <button class="login-button" @click="handleLogin">登录</button>
       </div>
     </div>
   </div>
@@ -60,7 +66,7 @@ export default {
   data() {
     let validateUsername = (rule, value, callback) => {
       if (value === "") {
-        callback(new Error("用户名不能为空！"));
+        callback(new Error("账号不能为空！"));
       } else {
         callback();
       }
@@ -99,36 +105,42 @@ export default {
       }
     },
     handleLogin() {
-      login({
-        username: this.loginForm.username,
-        password: this.$getRsaCode(this.loginForm.password)
-      }).then(res => {
-        if (res.code === 200) {
-          // 次级菜单
-          this.mutMenu2Active(0);
-          // 登录错误信息提示
-          this.errorMsg = "";
-          // 记住用户名
-          localStorage.username = this.loginForm.username;
-          // 储存token
-          let token = res.data.tokenHead + res.data.token;
-          sessionStorage.setItem("token", token);
-          this.mutLogin(token);
-          // 记住密码
-          if (this.rememberPwd) {
-            localStorage.password = this.loginForm.password;
-          } else {
-            localStorage.password = "";
-          }
-          // 储存用户信息及左侧菜单
-          this.getInfo();
-          // 页面跳转
-          setTimeout(() => {
-            this.$router.push("/");
-          }, 100);
+      this.$refs["ruleForm"].validate(valid => {
+        if (valid) {
+          login({
+            username: this.loginForm.username,
+            password: this.$getRsaCode(this.loginForm.password)
+          }).then(res => {
+            if (res.success) {
+              // 次级菜单
+              this.mutMenu2Active(0);
+              // 登录错误信息提示
+              this.errorMsg = "";
+              // 记住用户名
+              localStorage.username = this.loginForm.username;
+              // 储存token
+              let token = res.data.tokenHead + res.data.token;
+              sessionStorage.setItem("token", token);
+              this.mutLogin(token);
+              // 记住密码
+              if (this.rememberPwd) {
+                localStorage.password = this.loginForm.password;
+              } else {
+                localStorage.password = "";
+              }
+              // 储存用户信息及左侧菜单
+              this.getInfo();
+              // 页面跳转
+              setTimeout(() => {
+                this.$router.push("/");
+              }, 100);
+            } else {
+              // 登录错误提示
+              this.errMsg = getErrorMsg(res);
+            }
+          });
         } else {
-          // 登录错误提示
-          this.errMsg = getErrorMsg(res);
+          return false;
         }
       });
     },
@@ -170,19 +182,24 @@ export default {
 <style lang="stylus" scoped>
 @import '~@/assets/css/common.styl'
 $dd = #939DA8
+// 消除搜狗浏览器密码输入框后面软键盘图标
+.psw-visible-box >>> input::-webkit-input-safebox-button
+  display: none
 .el-form-item >>> .el-input__inner
   border: 1px solid $dd
   border-left: 5px solid $blue
   border-radius: 0
   background: $mainLight
-  font-size: $font20
-  font-weight: 600
+  font-size: $font14
 .is-error >>> .el-input__inner
   border-color: $dd
   border-left: 5px solid $blue
   &:focus
     border-color: $dd
     border-left: 5px solid $blue
+.el-form>>> .el-form-item__error
+  font-size: $font14
+  padding-top: 8px
 .login-wrapper
   position: absolute
   top: 0
@@ -195,9 +212,9 @@ $dd = #939DA8
   justify-content: center
   align-items: center
   .login-box
-    width: 60%
-    height: 0
-    padding-bottom: 37%
+    width: 45.3125%
+    // height: 0
+    // padding-bottom: 28%
     box-shadow: 0px 0px 49px 0px rgba(169, 169, 169, 0.75)
     background: $white
     display: flex
@@ -213,24 +230,31 @@ $dd = #939DA8
     .login-box-right
       flex: 0 0 50%
       width: 50%
-      height: 100%
+      // height: 100%
       display: flex
       flex-direction: column
       align-items: center
       .login-title
-        font-size: $font36
-        margin: 7vw 0 5.21vw 0
+        font-size: $font30
+        font-weight: bold
+        margin-top: 5.73vw
+        color: #757575
+      .login-title2
+        font-size: $font12
+        font-weight: bold
+        margin-top: 0.41667vw
         color: #757575
       .login-form
-        width: 20vw
+        width: 15.5vw
+        margin-top: 2.396vw
         position: relative
         .el-form-item
-          margin-bottom: 1.51vw
+          margin-bottom: 1.6667vw
         .psw-visible-box
           position: relative
           .psw-visible
-            width: 1.458vw
-            height: 1.458vw
+            width: 1.1146vw
+            height: 1.1146vw
             position: absolute
             top: 0.45vw
             right: 0.5vw
@@ -241,14 +265,14 @@ $dd = #939DA8
           bottom: 5px
           color: $red
       .login-checkbox
-        flex: 0 0 1.25vw
-        width: 20vw
-        height: 1.25vw
+        flex: 0 0 0.953vw
+        width: 15.5vw
+        height: 0.953vw
         position: relative
         overflow: hidden
         input
-          width: 1.25vw
-          height: 1.25vw
+          width: 0.953vw
+          height: 0.953vw
           position: absolute
           left: 0
           top: 0
@@ -257,27 +281,26 @@ $dd = #939DA8
           cursor: pointer
         label
           color: #BBBBBB
-          line-height: 1.25vw
-          font-size: $font18
-          font-weight: 600
+          line-height: 0.953vw
+          font-size: $font14
           margin-left: 5px
           cursor: pointer
         .icon
-          width: 1.25vw
-          height: 1.25vw
+          width: 0.953vw
+          height: 0.953vw
           vertical-align: top
           cursor: pointer
       .login-button
-        width: 20vw
-        height: 2.95vw
-        line-height: 2.95vw
-        margin-top: 1.771vw
+        width: 15.5vw
+        height: 2.29vw
+        line-height: 2.29vw
+        margin-top: 1.04vw
         border: none
         outline: none
         border-radius: 1.475vw
         background: $blue
         cursor: pointer
         color: $white
-        font-weight: 600
-        font-size: $font24
+        // font-weight: 600
+        font-size: $font18
 </style>
