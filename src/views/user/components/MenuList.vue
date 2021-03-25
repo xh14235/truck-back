@@ -13,7 +13,7 @@
             <th class="reagon-table-item">菜单名称</th>
             <th class="reagon-table-item">菜单级数</th>
             <th class="reagon-table-item">前端名称</th>
-            <th class="reagon-table-item">前端图标</th>
+            <!-- <th class="reagon-table-item">前端图标</th> -->
             <th class="reagon-table-item">是否显示</th>
             <th class="reagon-table-item">排序</th>
             <th class="reagon-table-item">查看上下级</th>
@@ -32,7 +32,9 @@
               {{ item.level === 0 ? "一级" : "二级" }}
             </td>
             <td class="reagon-table-item">{{ item.name }}</td>
-            <td class="reagon-table-item">{{ item.icon }}</td>
+            <!-- <td class="reagon-table-item">
+              <img :src="item.icon" alt="" />
+            </td> -->
             <td class="reagon-table-item">
               <el-switch
                 :active-value="0"
@@ -111,6 +113,7 @@
 import { mapState, mapMutations } from "vuex";
 import { getMenuList, getErrorMsg } from "@/http/api";
 import axios from "axios";
+import user from "@/assets/img/user.png";
 export default {
   naem: "MenuList",
   data() {
@@ -121,7 +124,10 @@ export default {
       level: 0,
       total: 0,
       pageNum: 1,
-      pageSize: 10
+      pageSize: 10,
+      imgList: {
+        user
+      }
     };
   },
   computed: {
@@ -175,6 +181,16 @@ export default {
         getMenuList().then(res => {
           if (res.success) {
             this.menuList = res.data;
+            // this.menuList.map(item => {
+            //   let icon;
+            //   if (item.icon) {
+            //     icon = require("../../../assets/img/" + item.icon + ".png");
+            //   } else {
+            //     icon = "";
+            //   }
+            //   item.icon = icon;
+            //   return item;
+            // });
             this.selectList = [];
             this.selectList.push({
               id: 0,
@@ -216,6 +232,17 @@ export default {
           .then(res => {
             if (res.data.success) {
               this.menuList = res.data.data.list;
+              // this.menuList.map(item => {
+              //   let icon;
+              //   if (item.icon) {
+              //     icon = require("../../../assets/img/" + item.icon + ".png");
+              //   } else {
+              //     icon = "";
+              //   }
+              //   item.icon = icon;
+              //   item.icon = icon;
+              //   return item;
+              // });
               this.total = res.data.data.total;
               if (!this.menuList.length) {
                 this.getMenuList(1);

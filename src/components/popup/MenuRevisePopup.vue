@@ -31,9 +31,9 @@
             <el-form-item label="前端名称" prop="name">
               <el-input v-model="ruleForm.name"></el-input>
             </el-form-item>
-            <el-form-item label="前端图标" prop="icon">
+            <!-- <el-form-item label="前端图标" prop="icon">
               <el-input v-model="ruleForm.icon"></el-input>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item label="排序" prop="sort">
               <el-input-number
                 v-model="ruleForm.sort"

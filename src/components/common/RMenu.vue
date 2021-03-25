@@ -55,6 +55,11 @@
             :key="item2.url"
           >
             <div class="menu-circle"></div>
+            <!-- <img
+              :src="require('../../assets/img/' + item2.icon + '.png')"
+              alt=""
+              class="menu-icon"
+            /> -->
             <div>{{ item2.title }}</div>
           </div>
         </div>

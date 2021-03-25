@@ -151,6 +151,7 @@ export default {
         // 左侧菜单
         let menu = [];
         let menus = res.data.menus;
+        console.log(menus);
         for (let i = 0; i < menus.length; i++) {
           if (!menus[i].parentId) {
             menu.push({
@@ -167,6 +168,7 @@ export default {
                 menu[j].children.push({
                   title: menus[i].title,
                   url: menu[j].url + "/" + menus[i].name
+                  // icon: menu[j].icon
                 });
               }
             }

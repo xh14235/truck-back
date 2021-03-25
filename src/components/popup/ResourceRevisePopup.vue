@@ -98,6 +98,7 @@ export default {
       }
     };
     return {
+      options: [],
       ruleForm: {
         createTime: "",
         id: 0,
@@ -147,6 +148,7 @@ export default {
   },
   created() {
     getResourceType().then(res => {
+      console.log(res);
       if (res.success) {
         this.options = res.data;
       } else {
